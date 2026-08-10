@@ -18,8 +18,8 @@ def storm_geojson(tmp_path) -> str:
                 "geometry": {"type": "Point", "coordinates": [124.8, 15.2]},
                 "properties": {
                     "storm_name": "SAMPLE",
-                    "max_wind_kph": 195,
-                    "pressure": 915,
+                    "max_wind_kph": 195.0,
+                    "pressure": 915.0,
                     "issued_at": "2024-11-17T05:00:00",
                     "signal_number": 4,
                     "typhoon_category": "Super Typhoon",
@@ -69,14 +69,47 @@ class TestRenderMap:
         html = output.read_text(encoding="utf-8")
 
         assert html.count("L.marker(") == 1  # current center
+        assert html.count("L.divIcon(") == 1  # pulsing radar icon
+        assert html.count("L.circle(") == 3  # radar radius rings
         assert html.count("L.circleMarker(") == 2  # forecast points
-        assert html.count("L.polyline(") == 1  # storm track
+        assert html.count("L.polyline.antPath(") == 1  # storm track
 
-    def test_track_is_dashed(self, storm_geojson, tmp_path):
+    def test_radar_rings(self, storm_geojson, tmp_path):
         output = tmp_path / "storm_map.html"
         render_map(storm_geojson, str(output))
         html = output.read_text(encoding="utf-8")
-        assert '"dashArray": "5, 5"' in html
+
+        # Eye Wall / Severe Core: 40 km, red, 0.4 fill.
+        assert '"radius": 40000' in html
+        assert '"color": "#FF0000"' in html
+        assert '"fillOpacity": 0.4' in html
+        # Storm-Force Winds: 100 km, orange, 0.25 fill.
+        assert '"radius": 100000' in html
+        assert '"color": "#FF8C00"' in html
+        assert '"fillOpacity": 0.25' in html
+        # Gale-Force Winds: 200 km, yellow, 0.15 fill.
+        assert '"radius": 200000' in html
+        assert '"color": "#FFD700"' in html
+        assert '"fillOpacity": 0.15' in html
+
+    def test_center_icon_is_pulsing_radar_wave(self, storm_geojson, tmp_path):
+        output = tmp_path / "storm_map.html"
+        render_map(storm_geojson, str(output))
+        html = output.read_text(encoding="utf-8")
+
+        assert "@keyframes radar-ping" in html
+        assert "animation: radar-ping 2s ease-out infinite" in html
+        assert "00FF88" in html  # radar ring stroke color
+        assert html.count("L.divIcon(") == 1
+
+    def test_track_is_animated_ant_path(self, storm_geojson, tmp_path):
+        output = tmp_path / "storm_map.html"
+        render_map(storm_geojson, str(output))
+        html = output.read_text(encoding="utf-8")
+
+        assert "L.polyline.antPath(" in html
+        assert '"delay": 1000' in html
+        assert '"dashArray": [' in html
 
     def test_current_center_popup_has_storm_data(self, storm_geojson, tmp_path):
         output = tmp_path / "storm_map.html"
