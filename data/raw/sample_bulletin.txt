@@ -1,0 +1,35 @@
+PAGASA SEVERE WEATHER BULLETIN #15
+Typhoon "SAMPLE" (SAMPLE)
+Issued at 5:00 AM, 17 November 2024
+
+"SAMPLE" intensified into a Super Typhoon while moving west-northwestward
+over the Philippine Sea east of Northern Luzon.
+
+HAZARDS AFFECTING LAND AREAS
+Super Typhoon SAMPLE will bring heavy rainfall and destructive winds to
+Northern Luzon in the next 72 hours. Tropical cyclone wind signal (TCWS)
+#4 is hoisted over Batanes, Cagayan, and Isabela. TCWS #3 over Apayao,
+Ilocos Norte, and Abra.
+
+TRACK AND INTENSITY OUTLOOK
+SAMPLE is forecast to move west-northwestward and exit the Philippine
+Area of Responsibility by Thursday evening.
+
+CURRENT WEATHER SYSTEMS
+The southwest monsoon enhanced by SAMPLE will bring rains over the western
+sections of Central and Southern Luzon.
+
+LOCATION OF CENTER (as of 5:00 AM)
+15.2N, 124.8E
+Moving: West-northwestward at 20 km/h
+Central pressure: 915 hPa
+Maximum sustained winds: 195 km/h near the center, with gustiness of up
+to 240 km/h
+
+FORECAST POSITIONS AND INTENSITY
+24 HOUR FORECAST (5:00 AM tomorrow): 15.8N, 123.6E, 195 km/h
+48 HOUR FORECAST (5:00 AM, 19 November): 16.4N, 122.2E, 185 km/h
+72 HOUR FORECAST (5:00 AM, 20 November): 17.0N, 120.8E, 170 km/h
+
+NEXT BULLETIN
+The next bulletin will be issued at 11:00 AM today.
