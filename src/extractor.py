@@ -47,7 +47,7 @@ def get_client() -> Any:
         )
         _client = instructor.from_openai(
             raw_client,
-            mode=instructor.Mode.TOOLS,
+            mode=instructor.Mode.MD_JSON,
         )
     return _client
 
@@ -58,6 +58,7 @@ def parse_bulletin_text(raw_text: str) -> StormBulletin:
     return client.chat.completions.create(
         model=DEEPSEEK_MODEL,
         response_model=StormBulletin,
+        max_retries=3,
         messages=[
             {"role": "system", "content": _SYSTEM_PROMPT},
             {"role": "user", "content": raw_text},

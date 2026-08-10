@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_d254a7ab9dff7237ec01cc5e3e4b7a47 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_d254a7ab9dff7237ec01cc5e3e4b7a47" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_d254a7ab9dff7237ec01cc5e3e4b7a47 = L.map(
+                "map_d254a7ab9dff7237ec01cc5e3e4b7a47",
+                {
+                    center: [15.2, 124.8],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 6,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_b424a90c9348469e6da7df4f05cf1f29 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_b424a90c9348469e6da7df4f05cf1f29.addTo(map_d254a7ab9dff7237ec01cc5e3e4b7a47);
+        
+    
+            var marker_92115d618f52f1122c8191d8305f211e = L.marker(
+                [15.2, 124.8],
+                {
+}
+            ).addTo(map_d254a7ab9dff7237ec01cc5e3e4b7a47);
+        
+    
+            var icon_fc02ca7910ed71a659e53f9b551fcdce = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "red",
+  "iconColor": "white",
+  "icon": "cloud",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_999bfd700ed0630f3764d46b58f6b545 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_a1eda04dfa7d681b7500ecd200ec5beb = $(`<div id="html_a1eda04dfa7d681b7500ecd200ec5beb" style="width: 100.0%; height: 100.0%;"><b>SAMPLE</b><br>Category: Super Typhoon<br>Signal: #4<br>Max winds: 195.0 km/h<br>Pressure: 915.0 hPa<br>Issued: 2024-11-17T05:00:00</div>`)[0];
+                popup_999bfd700ed0630f3764d46b58f6b545.setContent(html_a1eda04dfa7d681b7500ecd200ec5beb);
+            
+        
+
+        marker_92115d618f52f1122c8191d8305f211e.bindPopup(popup_999bfd700ed0630f3764d46b58f6b545)
+        ;
+
+        
+    
+    
+            marker_92115d618f52f1122c8191d8305f211e.bindTooltip(
+                `<div>
+                     SAMPLE
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_92115d618f52f1122c8191d8305f211e.setIcon(icon_fc02ca7910ed71a659e53f9b551fcdce);
+            
+    
+            var circle_marker_be015b07158e625c069182a64cf323ac = L.circleMarker(
+                [15.8, 123.6],
+                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 3}
+            ).addTo(map_d254a7ab9dff7237ec01cc5e3e4b7a47);
+        
+    
+        var popup_5b501ad3d0bbb60359a427cf761dd5d8 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e2c54178a5b2700d1b2ffca6b7640400 = $(`<div id="html_e2c54178a5b2700d1b2ffca6b7640400" style="width: 100.0%; height: 100.0%;">Forecast #0<br>Time: 2024-11-18T05:00:00</div>`)[0];
+                popup_5b501ad3d0bbb60359a427cf761dd5d8.setContent(html_e2c54178a5b2700d1b2ffca6b7640400);
+            
+        
+
+        circle_marker_be015b07158e625c069182a64cf323ac.bindPopup(popup_5b501ad3d0bbb60359a427cf761dd5d8)
+        ;
+
+        
+    
+    
+            circle_marker_be015b07158e625c069182a64cf323ac.bindTooltip(
+                `<div>
+                     Forecast position
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_b2cead2486fe61683f36a88a106c26f2 = L.circleMarker(
+                [16.4, 122.2],
+                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 3}
+            ).addTo(map_d254a7ab9dff7237ec01cc5e3e4b7a47);
+        
+    
+        var popup_64c0b7670d65d9e7108d3c289732257e = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_6754e791f99a5bf98597fc6c0d704acd = $(`<div id="html_6754e791f99a5bf98597fc6c0d704acd" style="width: 100.0%; height: 100.0%;">Forecast #1<br>Time: 2024-11-19T05:00:00</div>`)[0];
+                popup_64c0b7670d65d9e7108d3c289732257e.setContent(html_6754e791f99a5bf98597fc6c0d704acd);
+            
+        
+
+        circle_marker_b2cead2486fe61683f36a88a106c26f2.bindPopup(popup_64c0b7670d65d9e7108d3c289732257e)
+        ;
+
+        
+    
+    
+            circle_marker_b2cead2486fe61683f36a88a106c26f2.bindTooltip(
+                `<div>
+                     Forecast position
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_915bb05c047bf9ca159c60a085815019 = L.circleMarker(
+                [17.0, 120.8],
+                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 3}
+            ).addTo(map_d254a7ab9dff7237ec01cc5e3e4b7a47);
+        
+    
+        var popup_b51d5d21e73be358ffd7dc5a1f2b4dfb = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_00147b3328d3b027afa52ed7b2e99625 = $(`<div id="html_00147b3328d3b027afa52ed7b2e99625" style="width: 100.0%; height: 100.0%;">Forecast #2<br>Time: 2024-11-20T05:00:00</div>`)[0];
+                popup_b51d5d21e73be358ffd7dc5a1f2b4dfb.setContent(html_00147b3328d3b027afa52ed7b2e99625);
+            
+        
+
+        circle_marker_915bb05c047bf9ca159c60a085815019.bindPopup(popup_b51d5d21e73be358ffd7dc5a1f2b4dfb)
+        ;
+
+        
+    
+    
+            circle_marker_915bb05c047bf9ca159c60a085815019.bindTooltip(
+                `<div>
+                     Forecast position
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var poly_line_a1f971d3e9138fb23e4022431c6fa23c = L.polyline(
+                [[15.2, 124.8], [15.8, 123.6], [16.4, 122.2], [17.0, 120.8]],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": "5, 5", "dashOffset": null, "fill": false, "fillColor": "blue", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 3}
+            ).addTo(map_d254a7ab9dff7237ec01cc5e3e4b7a47);
+        
+    
+            poly_line_a1f971d3e9138fb23e4022431c6fa23c.bindTooltip(
+                `<div>
+                     Storm track
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+</script>
+</html>
