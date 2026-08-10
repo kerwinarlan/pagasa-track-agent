@@ -17,7 +17,7 @@
             <meta name="viewport" content="width=device-width,
                 initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             <style>
-                #map_a4aa641b3a3822f5ff40a574eed82df0 {
+                #map_cbbd5125b44e58115b8c791a1ed17ace {
                     position: relative;
                     width: 100.0%;
                     height: 100.0%;
@@ -55,14 +55,177 @@
 <body>
     
     
-            <div class="folium-map" id="map_a4aa641b3a3822f5ff40a574eed82df0" ></div>
+<div id="storm-controls" style="position:absolute; left:0; top:0; width:100%; height:100%; z-index:400; pointer-events:none;">
+  <canvas id="storm-cloud-layer" width="320" height="320"
+          style="position:absolute; left:0; top:0; width:200px; height:200px; pointer-events:none;"></canvas>
+  <div id="storm-timeline" style="position:absolute; bottom:14px; left:50%; transform:translateX(-50%); z-index:1000; pointer-events:auto; background:rgba(20,25,40,0.82); border-radius:10px; padding:8px 14px 6px; text-align:center; font-family:sans-serif;">
+    <div id="storm-timeline-label" style="color:#fff; font-size:12px; margin-bottom:4px;">0%</div>
+    <input id="storm-timeline-slider" type="range" min="0" max="100" value="0"
+           style="width:260px; accent-color:#00e5ff; cursor:pointer;"
+           aria-label="Storm progression timeline">
+    <div style="color:#9fb0c9; font-size:10px; margin-top:2px;">Drag to scrub storm progression</div>
+  </div>
+</div>
+    
+            <div class="folium-map" id="map_cbbd5125b44e58115b8c791a1ed17ace" ></div>
         
 </body>
 <script>
     
     
-            var map_a4aa641b3a3822f5ff40a574eed82df0 = L.map(
-                "map_a4aa641b3a3822f5ff40a574eed82df0",
+(function () {
+  function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+  function mulberry32(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function smoothDamp(current, target, velocity, smoothTime, maxSpeed, dt) {
+    var safeTime = Math.max(0.0001, smoothTime);
+    var omega = 2 / safeTime;
+    var x = omega * dt;
+    var decay = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
+    var originalTarget = target;
+    var maxChange = maxSpeed * safeTime;
+    var change = clamp(current - target, -maxChange, maxChange);
+    var limitedTarget = current - change;
+    var temp = (velocity + omega * change) * dt;
+    var nextVelocity = (velocity - omega * temp) * decay;
+    var nextPosition = limitedTarget + (change + temp) * decay;
+    if ((originalTarget - current > 0) === (nextPosition > originalTarget)) {
+      nextPosition = originalTarget;
+      nextVelocity = 0;
+    }
+    return [nextPosition, nextVelocity];
+  }
+  function init() {
+    var map = window['map_cbbd5125b44e58115b8c791a1ed17ace'];
+    var slider = document.getElementById('storm-timeline-slider');
+    var label = document.getElementById('storm-timeline-label');
+    var canvas = document.getElementById('storm-cloud-layer');
+    if (!map || !slider || !canvas) return;
+    map.getContainer().appendChild(document.getElementById('storm-controls'));
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width, H = canvas.height;
+    var CX = W / 2, CY = H / 2;
+    var FRAME_COUNT = 24;
+    var center = {"lat": 15.2, "lon": 124.8};
+    var track = [[15.2, 124.8], [15.8, 123.6], [16.4, 122.2], [17.0, 120.8]];
+    var rand = mulberry32(20241117);
+    var BLOBS = [];
+    for (var i = 0; i < 44; i++) {
+      var r = Math.sqrt(rand()) * W * 0.46;
+      var a = rand() * Math.PI * 2;
+      BLOBS.push({
+        x: CX + Math.cos(a) * r,
+        y: CY + Math.sin(a) * r,
+        r: 8 + rand() * 16,
+        alpha: 0.35 + rand() * 0.45
+      });
+    }
+    function drawFrame(frame) {
+      var progress = frame / (FRAME_COUNT - 1);
+      var phase = progress * Math.PI * 2;
+      var scale = 0.85 + 0.3 * progress;
+      var baseAlpha = 0.5 + 0.4 * progress;
+      ctx.clearRect(0, 0, W, H);
+      for (var i = 0; i < BLOBS.length; i++) {
+        var b = BLOBS[i];
+        var dx = b.x - CX, dy = b.y - CY;
+        var ang = Math.atan2(dy, dx) + phase;
+        var rad = Math.hypot(dx, dy) * scale;
+        var x = CX + Math.cos(ang) * rad;
+        var y = CY + Math.sin(ang) * rad;
+        var radius = b.r * (1.1 + 0.5 * progress);
+        var g = ctx.createRadialGradient(x, y, 0, x, y, radius);
+        g.addColorStop(0, 'rgba(255,255,255,' + (b.alpha * baseAlpha).toFixed(3) + ')');
+        g.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    function interpolateTrack(t) {
+      if (track.length === 0) return null;
+      if (track.length === 1 || t <= 0) return track[0];
+      if (t >= 1) return track[track.length - 1];
+      var segs = [], total = 0, i;
+      for (i = 1; i < track.length; i++) {
+        var d = Math.hypot(track[i][0] - track[i - 1][0], track[i][1] - track[i - 1][1]);
+        segs.push(d); total += d;
+      }
+      var dist = t * total;
+      for (i = 0; i < segs.length; i++) {
+        if (dist <= segs[i] || i === segs.length - 1) {
+          var f = segs[i] === 0 ? 0 : dist / segs[i];
+          return [track[i][0] + (track[i + 1][0] - track[i][0]) * f,
+                  track[i][1] + (track[i + 1][1] - track[i][1]) * f];
+        }
+        dist -= segs[i];
+      }
+      return track[track.length - 1];
+    }
+    function updateLabel(frame) {
+      var progress = frame / (FRAME_COUNT - 1);
+      var pct = Math.round(progress * 100);
+      var p = interpolateTrack(progress);
+      var posText = p ? p[0].toFixed(1) + 'N, ' + p[1].toFixed(1) + 'E' : '';
+      label.textContent = pct + '%  ' + posText;
+    }
+    var position = 0, target = 0, velocity = 0, lastFrame = -1, raf = 0, lastTime = 0;
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function render() {
+      var frame = Math.round(clamp(position, 0, FRAME_COUNT - 1));
+      if (frame !== lastFrame) {
+        drawFrame(frame);
+        updateLabel(frame);
+        lastFrame = frame;
+      }
+    }
+    function loop(now) {
+      raf = 0;
+      var dt = lastTime ? Math.min((now - lastTime) / 1000, 1 / 30) : 1 / 60;
+      lastTime = now;
+      if (reduced) {
+        position = target;
+        velocity = 0;
+      } else {
+        var result = smoothDamp(position, target, velocity, 0.11, FRAME_COUNT * 2, dt);
+        position = result[0];
+        velocity = result[1];
+      }
+      render();
+      if (Math.abs(target - position) > 0.002 || Math.abs(velocity) > 0.002) {
+        raf = requestAnimationFrame(loop);
+      }
+    }
+    function setProgress(p) {
+      target = clamp(p, 0, 1) * (FRAME_COUNT - 1);
+      if (raf === 0) { lastTime = 0; raf = requestAnimationFrame(loop); }
+    }
+    slider.addEventListener('input', function () {
+      setProgress(slider.value / 100);
+    });
+    function positionCanvas() {
+      var point = map.latLngToContainerPoint([center.lat, center.lon]);
+      canvas.style.left = (point.x - 100) + 'px';
+      canvas.style.top = (point.y - 100) + 'px';
+    }
+    map.on('move zoom resize', positionCanvas);
+    positionCanvas();
+    setProgress(0);
+    render();
+  }
+  setTimeout(init, 0);
+})();
+    
+            var map_cbbd5125b44e58115b8c791a1ed17ace = L.map(
+                "map_cbbd5125b44e58115b8c791a1ed17ace",
                 {
                     center: [15.2, 124.8],
                     crs: L.CRS.EPSG3857,
@@ -79,7 +242,7 @@
 
         
     
-            var tile_layer_b5b05f085b0e697893b5bf38bde60047 = L.tileLayer(
+            var tile_layer_48a69cf627e0cd8eeda9b9bf7c355d29 = L.tileLayer(
                 "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                 {
   "minZoom": 0,
@@ -96,16 +259,16 @@
             );
         
     
-            tile_layer_b5b05f085b0e697893b5bf38bde60047.addTo(map_a4aa641b3a3822f5ff40a574eed82df0);
+            tile_layer_48a69cf627e0cd8eeda9b9bf7c355d29.addTo(map_cbbd5125b44e58115b8c791a1ed17ace);
         
     
-            var circle_9ab19a01230bf1d4a182dd0a5c3bdd13 = L.circle(
+            var circle_d9028a53700f1925c0bacd7b73196aaf = L.circle(
                 [15.2, 124.8],
                 {"bubblingMouseEvents": true, "color": "#FF0000", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#FF0000", "fillOpacity": 0.4, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 40000, "stroke": true, "weight": 1}
-            ).addTo(map_a4aa641b3a3822f5ff40a574eed82df0);
+            ).addTo(map_cbbd5125b44e58115b8c791a1ed17ace);
         
     
-            circle_9ab19a01230bf1d4a182dd0a5c3bdd13.bindTooltip(
+            circle_d9028a53700f1925c0bacd7b73196aaf.bindTooltip(
                 `<div>
                      Eye Wall / Severe Core (40 km)
                  </div>`,
@@ -115,13 +278,13 @@
             );
         
     
-            var circle_99b6e276a8b403368dfc3480df5a5831 = L.circle(
+            var circle_ea472693c3a1a38f49a56617b1bcfae1 = L.circle(
                 [15.2, 124.8],
                 {"bubblingMouseEvents": true, "color": "#FF8C00", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#FF8C00", "fillOpacity": 0.25, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 100000, "stroke": true, "weight": 1}
-            ).addTo(map_a4aa641b3a3822f5ff40a574eed82df0);
+            ).addTo(map_cbbd5125b44e58115b8c791a1ed17ace);
         
     
-            circle_99b6e276a8b403368dfc3480df5a5831.bindTooltip(
+            circle_ea472693c3a1a38f49a56617b1bcfae1.bindTooltip(
                 `<div>
                      Storm-Force Winds (100 km)
                  </div>`,
@@ -131,13 +294,13 @@
             );
         
     
-            var circle_fc7dfa46ba43f9e38d89a05b91c5425d = L.circle(
+            var circle_4868439f28e55d19502205306787c0ec = L.circle(
                 [15.2, 124.8],
                 {"bubblingMouseEvents": true, "color": "#FFD700", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#FFD700", "fillOpacity": 0.15, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 200000, "stroke": true, "weight": 1}
-            ).addTo(map_a4aa641b3a3822f5ff40a574eed82df0);
+            ).addTo(map_cbbd5125b44e58115b8c791a1ed17ace);
         
     
-            circle_fc7dfa46ba43f9e38d89a05b91c5425d.bindTooltip(
+            circle_4868439f28e55d19502205306787c0ec.bindTooltip(
                 `<div>
                      Gale-Force Winds (200 km)
                  </div>`,
@@ -147,14 +310,14 @@
             );
         
     
-            var marker_1ad3cfecff2726bf2c1ef1c65cc4a352 = L.marker(
+            var marker_7cc16d1704a574ea242c527a2a730f2b = L.marker(
                 [15.2, 124.8],
                 {
 }
-            ).addTo(map_a4aa641b3a3822f5ff40a574eed82df0);
+            ).addTo(map_cbbd5125b44e58115b8c791a1ed17ace);
         
     
-            var div_icon_f923627ea8ef68619efbfe37eec433e7 = L.divIcon({
+            var div_icon_4539db907c8ab71ec6b73adba8e2ca86 = L.divIcon({
   "html": "\n\u003cdiv style=\"width: 48px; height: 48px;\"\u003e\n  \u003cstyle\u003e\n    @keyframes radar-ping {\n      0% { transform: scale(0.3); opacity: 1; }\n      100% { transform: scale(1.5); opacity: 0; }\n    }\n    .radar-ping {\n      transform-origin: center;\n      transform-box: fill-box;\n      animation: radar-ping 2s ease-out infinite;\n    }\n    .radar-ping-2 { animation-delay: 0.5s; }\n    .radar-ping-3 { animation-delay: 1s; }\n    .radar-ping-4 { animation-delay: 1.5s; }\n  \u003c/style\u003e\n  \u003csvg viewBox=\"0 0 48 48\" width=\"48\" height=\"48\"\u003e\n    \u003ccircle class=\"radar-ping\" cx=\"24\" cy=\"24\" r=\"9\" fill=\"none\"\n            stroke=\"#00FF88\" stroke-width=\"2\"/\u003e\n    \u003ccircle class=\"radar-ping radar-ping-2\" cx=\"24\" cy=\"24\" r=\"9\"\n            fill=\"none\" stroke=\"#00FF88\" stroke-width=\"2\"/\u003e\n    \u003ccircle class=\"radar-ping radar-ping-3\" cx=\"24\" cy=\"24\" r=\"9\"\n            fill=\"none\" stroke=\"#00FF88\" stroke-width=\"2\"/\u003e\n    \u003ccircle class=\"radar-ping radar-ping-4\" cx=\"24\" cy=\"24\" r=\"9\"\n            fill=\"none\" stroke=\"#00FF88\" stroke-width=\"2\"/\u003e\n    \u003ccircle cx=\"24\" cy=\"24\" r=\"4.5\" fill=\"#00FF88\"/\u003e\n  \u003c/svg\u003e\n\u003c/div\u003e\n",
   "iconSize": [48, 48],
   "iconAnchor": [24, 24],
@@ -162,24 +325,24 @@
 });
         
     
-        var popup_82360668ef5807c56c23ffd2a61e4a38 = L.popup({
+        var popup_6d424839ab3fa2238ef73b79e235110d = L.popup({
   "maxWidth": 300,
 });
 
         
             
-                var html_95d2f0a138833b8aacc5b1d60f731b24 = $(`<div id="html_95d2f0a138833b8aacc5b1d60f731b24" style="width: 100.0%; height: 100.0%;"><b>SAMPLE</b><br>Category: Super Typhoon<br>Signal: #4<br>Max winds: 195 km/h<br>Pressure: 915 hPa<br>Issued: 2024-11-17T05:00:00</div>`)[0];
-                popup_82360668ef5807c56c23ffd2a61e4a38.setContent(html_95d2f0a138833b8aacc5b1d60f731b24);
+                var html_8e8640c0ef5cf167995c2e9d49c4efc3 = $(`<div id="html_8e8640c0ef5cf167995c2e9d49c4efc3" style="width: 100.0%; height: 100.0%;"><b>SAMPLE</b><br>Category: Super Typhoon<br>Signal: #4<br>Max winds: 195 km/h<br>Pressure: 915 hPa<br>Issued: 2024-11-17T05:00:00</div>`)[0];
+                popup_6d424839ab3fa2238ef73b79e235110d.setContent(html_8e8640c0ef5cf167995c2e9d49c4efc3);
             
         
 
-        marker_1ad3cfecff2726bf2c1ef1c65cc4a352.bindPopup(popup_82360668ef5807c56c23ffd2a61e4a38)
+        marker_7cc16d1704a574ea242c527a2a730f2b.bindPopup(popup_6d424839ab3fa2238ef73b79e235110d)
         ;
 
         
     
     
-            marker_1ad3cfecff2726bf2c1ef1c65cc4a352.bindTooltip(
+            marker_7cc16d1704a574ea242c527a2a730f2b.bindTooltip(
                 `<div>
                      SAMPLE
                  </div>`,
@@ -189,33 +352,33 @@
             );
         
     
-                marker_1ad3cfecff2726bf2c1ef1c65cc4a352.setIcon(div_icon_f923627ea8ef68619efbfe37eec433e7);
+                marker_7cc16d1704a574ea242c527a2a730f2b.setIcon(div_icon_4539db907c8ab71ec6b73adba8e2ca86);
             
     
-            var circle_marker_652f8dc457b828734008880c1c0134e4 = L.circleMarker(
+            var circle_marker_425895eb7cd36918bd20873d255c8bb0 = L.circleMarker(
                 [15.8, 123.6],
                 {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 3}
-            ).addTo(map_a4aa641b3a3822f5ff40a574eed82df0);
+            ).addTo(map_cbbd5125b44e58115b8c791a1ed17ace);
         
     
-        var popup_09ad213a7b1568afae0130a99813da50 = L.popup({
+        var popup_18dd7a44b709d7d43213aaa6c501333f = L.popup({
   "maxWidth": 300,
 });
 
         
             
-                var html_53478a86b53881f8fcd98561ab711dce = $(`<div id="html_53478a86b53881f8fcd98561ab711dce" style="width: 100.0%; height: 100.0%;">Forecast #0<br>Time: 2024-11-18T05:00:00</div>`)[0];
-                popup_09ad213a7b1568afae0130a99813da50.setContent(html_53478a86b53881f8fcd98561ab711dce);
+                var html_429e1dae9193bef63436c09d8e33b889 = $(`<div id="html_429e1dae9193bef63436c09d8e33b889" style="width: 100.0%; height: 100.0%;">Forecast #0<br>Time: 2024-11-18T05:00:00</div>`)[0];
+                popup_18dd7a44b709d7d43213aaa6c501333f.setContent(html_429e1dae9193bef63436c09d8e33b889);
             
         
 
-        circle_marker_652f8dc457b828734008880c1c0134e4.bindPopup(popup_09ad213a7b1568afae0130a99813da50)
+        circle_marker_425895eb7cd36918bd20873d255c8bb0.bindPopup(popup_18dd7a44b709d7d43213aaa6c501333f)
         ;
 
         
     
     
-            circle_marker_652f8dc457b828734008880c1c0134e4.bindTooltip(
+            circle_marker_425895eb7cd36918bd20873d255c8bb0.bindTooltip(
                 `<div>
                      Forecast position
                  </div>`,
@@ -225,30 +388,30 @@
             );
         
     
-            var circle_marker_21578b7f10a1cd9189c22b7b21662123 = L.circleMarker(
+            var circle_marker_56af1ab62b9394eeb0ddbdbcc0595239 = L.circleMarker(
                 [16.4, 122.2],
                 {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 3}
-            ).addTo(map_a4aa641b3a3822f5ff40a574eed82df0);
+            ).addTo(map_cbbd5125b44e58115b8c791a1ed17ace);
         
     
-        var popup_94501d490814c0a1f4455f3711eb16ba = L.popup({
+        var popup_f7d854888c6fd8df797fdeadcceb5d59 = L.popup({
   "maxWidth": 300,
 });
 
         
             
-                var html_6aaf61e55b66772c69446627e13b15aa = $(`<div id="html_6aaf61e55b66772c69446627e13b15aa" style="width: 100.0%; height: 100.0%;">Forecast #1<br>Time: 2024-11-19T05:00:00</div>`)[0];
-                popup_94501d490814c0a1f4455f3711eb16ba.setContent(html_6aaf61e55b66772c69446627e13b15aa);
+                var html_461a56d4821e4db767d7ae42260daf2b = $(`<div id="html_461a56d4821e4db767d7ae42260daf2b" style="width: 100.0%; height: 100.0%;">Forecast #1<br>Time: 2024-11-19T05:00:00</div>`)[0];
+                popup_f7d854888c6fd8df797fdeadcceb5d59.setContent(html_461a56d4821e4db767d7ae42260daf2b);
             
         
 
-        circle_marker_21578b7f10a1cd9189c22b7b21662123.bindPopup(popup_94501d490814c0a1f4455f3711eb16ba)
+        circle_marker_56af1ab62b9394eeb0ddbdbcc0595239.bindPopup(popup_f7d854888c6fd8df797fdeadcceb5d59)
         ;
 
         
     
     
-            circle_marker_21578b7f10a1cd9189c22b7b21662123.bindTooltip(
+            circle_marker_56af1ab62b9394eeb0ddbdbcc0595239.bindTooltip(
                 `<div>
                      Forecast position
                  </div>`,
@@ -258,30 +421,30 @@
             );
         
     
-            var circle_marker_e14f125f3ee0d5faa593d7b9b15da5a3 = L.circleMarker(
+            var circle_marker_a53191b536445a925defa7e37ba50619 = L.circleMarker(
                 [17.0, 120.8],
                 {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.8, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 6, "stroke": true, "weight": 3}
-            ).addTo(map_a4aa641b3a3822f5ff40a574eed82df0);
+            ).addTo(map_cbbd5125b44e58115b8c791a1ed17ace);
         
     
-        var popup_9a31d0f09c0951ac737dac2b68f024c7 = L.popup({
+        var popup_f67d7e0c62d4b8acbc0fb4ca40617b58 = L.popup({
   "maxWidth": 300,
 });
 
         
             
-                var html_6bcbb8a1376d8dec23251e2314a9da01 = $(`<div id="html_6bcbb8a1376d8dec23251e2314a9da01" style="width: 100.0%; height: 100.0%;">Forecast #2<br>Time: 2024-11-20T05:00:00</div>`)[0];
-                popup_9a31d0f09c0951ac737dac2b68f024c7.setContent(html_6bcbb8a1376d8dec23251e2314a9da01);
+                var html_aeb77e419cc1f1ff3fb19bd81c835f0b = $(`<div id="html_aeb77e419cc1f1ff3fb19bd81c835f0b" style="width: 100.0%; height: 100.0%;">Forecast #2<br>Time: 2024-11-20T05:00:00</div>`)[0];
+                popup_f67d7e0c62d4b8acbc0fb4ca40617b58.setContent(html_aeb77e419cc1f1ff3fb19bd81c835f0b);
             
         
 
-        circle_marker_e14f125f3ee0d5faa593d7b9b15da5a3.bindPopup(popup_9a31d0f09c0951ac737dac2b68f024c7)
+        circle_marker_a53191b536445a925defa7e37ba50619.bindPopup(popup_f67d7e0c62d4b8acbc0fb4ca40617b58)
         ;
 
         
     
     
-            circle_marker_e14f125f3ee0d5faa593d7b9b15da5a3.bindTooltip(
+            circle_marker_a53191b536445a925defa7e37ba50619.bindTooltip(
                 `<div>
                      Forecast position
                  </div>`,
@@ -291,7 +454,7 @@
             );
         
     
-            ant_path_12c751461eedfa2878c502127b459c4e = L.polyline.antPath(
+            ant_path_d4eb540e5f567306526f05dacf8e32c0 = L.polyline.antPath(
               [[15.2, 124.8], [15.8, 123.6], [16.4, 122.2], [17.0, 120.8]],
               {
   "stroke": true,
@@ -318,10 +481,10 @@
   "delay": 1000,
   "pulseColor": "#FFFFFF",
 }
-        ).addTo(map_a4aa641b3a3822f5ff40a574eed82df0);
+        ).addTo(map_cbbd5125b44e58115b8c791a1ed17ace);
         
     
-            ant_path_12c751461eedfa2878c502127b459c4e.bindTooltip(
+            ant_path_d4eb540e5f567306526f05dacf8e32c0.bindTooltip(
                 `<div>
                      Storm track
                  </div>`,

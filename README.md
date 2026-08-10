@@ -38,7 +38,9 @@ Pipeline stages:
    RFC 7946 FeatureCollection (lon/lat order) with center point, forecast
    points, and a track LineString.
 4. **Visualize** - `src/map_visualizer.py` renders the GeoJSON as an
-   interactive Leaflet map with markers, popups, and a dashed track line.
+   interactive Leaflet map with radar rings, a pulsing radar-wave marker,
+   forecast markers, an animated storm-track line, and a scrubbable
+   timeline that drives a satellite cloud animation over the track.
 
 ## Features
 
@@ -55,8 +57,10 @@ Pipeline stages:
   latitude coordinate order. Includes the current center, every forecast
   position, and a track LineString.
 - **Interactive visualizer** - Folium renders a Leaflet HTML map with a
-  center marker (popup with wind speed and pressure), orange circle markers
-  for forecast positions, and a dashed storm-track line.
+  pulsing radar-wave marker, multi-tiered wind/radar radius rings, orange
+  circle markers for forecast positions, and an animated ant-path storm
+  track. A scrubbable timeline at the bottom drives a satellite cloud
+  animation over the storm as you drag from 0% to 100% progression.
 - **Tests** - 42 pytest tests cover schemas, extraction flow, GeoJSON
   export, and map rendering.
 

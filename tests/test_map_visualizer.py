@@ -139,3 +139,51 @@ class TestRenderMap:
     def test_default_html_path_is_under_data_output(self):
         assert DEFAULT_HTML_PATH.name == "storm_map.html"
         assert "output" in DEFAULT_HTML_PATH.parts
+
+
+class TestStormTimeline:
+    """Tests for the scrubbable timeline and cloud animation layer."""
+
+    @pytest.fixture
+    def map_html(self, storm_geojson, tmp_path) -> str:
+        output = tmp_path / "storm_map.html"
+        render_map(storm_geojson, str(output))
+        return output.read_text(encoding="utf-8")
+
+    def test_timeline_slider_present(self, map_html):
+        assert 'id="storm-timeline-slider"' in map_html
+        assert 'type="range"' in map_html
+        assert 'min="0" max="100"' in map_html
+        assert 'value="0"' in map_html
+
+    def test_timeline_label_present(self, map_html):
+        assert 'id="storm-timeline-label"' in map_html
+
+    def test_cloud_canvas_present(self, map_html):
+        assert 'id="storm-cloud-layer"' in map_html
+        assert "<canvas" in map_html
+        assert 'width="320" height="320"' in map_html
+
+    def test_slider_bound_to_frame_animator(self, map_html):
+        # The slider input must drive a progress-to-frame mapping.
+        assert "addEventListener('input'" in map_html
+        assert "setProgress" in map_html
+        assert "FRAME_COUNT" in map_html
+        assert "smoothDamp" in map_html
+        assert "requestAnimationFrame" in map_html
+
+    def test_cloud_layer_tracks_storm_center(self, map_html):
+        # The cloud canvas repositions over the storm center on map moves.
+        assert "latLngToContainerPoint" in map_html
+        assert "map.on('move zoom resize'" in map_html
+        assert "window['map_" in map_html
+
+    def test_reduced_motion_fallback(self, map_html):
+        assert "prefers-reduced-motion" in map_html
+
+    def test_track_coordinates_injected_for_progress_label(self, map_html):
+        # The label interpolates position along the track as you scrub.
+        assert "interpolateTrack" in map_html
+        assert "var track = [[15.2, 124.8]" in map_html
+        # Cloud layer must center on the storm center (lat/lon).
+        assert "var center = {\"lat\": 15.2, \"lon\": 124.8}" in map_html
