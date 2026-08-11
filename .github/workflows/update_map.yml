@@ -12,6 +12,12 @@ permissions:
   pages: write
   id-token: write
 
+# Only one update may run at a time. If a new run starts while another
+# is still going, it waits instead of pushing a stale snapshot.
+concurrency:
+  group: pagasa-map-update
+  cancel-in-progress: false
+
 jobs:
   update-map:
     runs-on: ubuntu-latest
@@ -19,6 +25,10 @@ jobs:
       # Step A: Get the latest code from your repo
       - name: Checkout Repository
         uses: actions/checkout@v7
+        with:
+          # Fetch full history so 'git pull --rebase' can replay the
+          # bot commit onto the latest remote state.
+          fetch-depth: 0
 
       # Step B: Install Python
       - name: Set up Python
@@ -42,6 +52,9 @@ jobs:
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
           git add data/output/storm_map.html data/output/storm_track.geojson
-        
           # Only commit if there are actually changes
-          git diff --quiet && git diff --staged --quiet || (git commit -m "bot: auto-update storm map" && git pull --rebase origin main && git push)
+          git diff --quiet && git diff --staged --quiet || git commit -m "bot: auto-update storm map"
+          # Integrate any commits pushed while this run was working,
+          # then push. This prevents the 'fetch first' rejection.
+          git pull --rebase origin main
+          git push
