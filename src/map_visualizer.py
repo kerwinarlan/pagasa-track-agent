@@ -1,13 +1,18 @@
 """Plot PAGASA storm GeoJSON data on an interactive Leaflet map.
 
-The module uses Folium to render radar rings and a pulsing radar-wave
-icon for the storm center, circle markers for forecast positions, and
-an animated dashed line for the storm track.
+The module emulates the official PAGASA Track and Intensity Forecast
+layout: a light basemap with the PAR boundary, a mathematically
+accurate cone of uncertainty, PAGASA intensity badges (D, S, swirl)
+with time callouts along the track, an optional near-real-time IR
+satellite layer, and banner and legend overlays. A layer control lets
+users toggle between the clean track view and the satellite view.
 """
 
 from __future__ import annotations
 
 import json
+import math
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -17,47 +22,6 @@ from folium.plugins import AntPath
 _PROJECT_ROOT: Path = Path(__file__).resolve().parent.parent
 DEFAULT_GEOJSON_PATH: Path = _PROJECT_ROOT / "data" / "output" / "storm_track.geojson"
 DEFAULT_HTML_PATH: Path = _PROJECT_ROOT / "data" / "output" / "storm_map.html"
-
-# Multi-tiered wind/radar radii around the storm center, in meters.
-# Each entry is (radius_m, color, fill_opacity, label).
-_RADAR_RINGS: list[tuple[float, str, float, str]] = [
-    (40000, "#FF0000", 0.4, "Eye Wall / Severe Core"),
-    (100000, "#FF8C00", 0.25, "Storm-Force Winds"),
-    (200000, "#FFD700", 0.15, "Gale-Force Winds"),
-]
-
-# A pulsing radar-wave marker for the storm center. The SVG shows a solid
-# dot with four expanding rings that fade out in sequence, like a radar
-# ping. The animation is defined inline so the marker works standalone.
-_RADAR_ICON_HTML: str = """
-<div style="width: 48px; height: 48px;">
-  <style>
-    @keyframes radar-ping {
-      0% { transform: scale(0.3); opacity: 1; }
-      100% { transform: scale(1.5); opacity: 0; }
-    }
-    .radar-ping {
-      transform-origin: center;
-      transform-box: fill-box;
-      animation: radar-ping 2s ease-out infinite;
-    }
-    .radar-ping-2 { animation-delay: 0.5s; }
-    .radar-ping-3 { animation-delay: 1s; }
-    .radar-ping-4 { animation-delay: 1.5s; }
-  </style>
-  <svg viewBox="0 0 48 48" width="48" height="48">
-    <circle class="radar-ping" cx="24" cy="24" r="9" fill="none"
-            stroke="#00FF88" stroke-width="2"/>
-    <circle class="radar-ping radar-ping-2" cx="24" cy="24" r="9"
-            fill="none" stroke="#00FF88" stroke-width="2"/>
-    <circle class="radar-ping radar-ping-3" cx="24" cy="24" r="9"
-            fill="none" stroke="#00FF88" stroke-width="2"/>
-    <circle class="radar-ping radar-ping-4" cx="24" cy="24" r="9"
-            fill="none" stroke="#00FF88" stroke-width="2"/>
-    <circle cx="24" cy="24" r="4.5" fill="#00FF88"/>
-  </svg>
-</div>
-"""
 
 
 def _load_geojson(geojson_path: str) -> dict[str, Any]:
@@ -97,68 +61,339 @@ def _format_number(value: Any) -> str:
     return str(value)
 
 
-def _add_radar_rings(
-    map_obj: folium.Map, feature: dict[str, Any]
+def get_category_color(wind_speed_kph: int) -> str:
+    """Return the PAGASA category color for a wind speed in km/h.
+
+    Categories follow official PAGASA intensity thresholds:
+    - Tropical Depression: up to 61 km/h (yellow)
+    - Tropical Storm: 62-88 km/h (green)
+    - Severe Tropical Storm: 89-117 km/h (orange)
+    - Typhoon: 118-184 km/h (red)
+    - Super Typhoon: 185 km/h and above (purple)
+    """
+    if wind_speed_kph <= 61:
+        return "#FFD700"
+    if wind_speed_kph <= 88:
+        return "#008000"
+    if wind_speed_kph <= 117:
+        return "#FFA500"
+    if wind_speed_kph <= 184:
+        return "#FF0000"
+    return "#800080"
+
+
+# Legend rows: (badge, wind color, description).
+_LEGEND_ENTRIES: list[tuple[str, str, str]] = [
+    ("D", "#FFD700", "Tropical Depression (<= 61 km/h)"),
+    ("S", "#008000", "Tropical Storm (62-88 km/h)"),
+    ("🌀", "#FFA500", "Severe Tropical Storm (89-117 km/h)"),
+    ("🌀", "#FF0000", "Typhoon (118-184 km/h)"),
+    ("🌀", "#800080", "Super Typhoon (>= 185 km/h)"),
+]
+
+# Philippine Area of Responsibility boundary as [lat, lon] vertices.
+_PAR_BOUNDARY: list[list[float]] = [
+    [25.0, 120.0],
+    [25.0, 135.0],
+    [5.0, 135.0],
+    [5.0, 115.0],
+    [15.0, 115.0],
+    [21.0, 120.0],
+]
+
+# Cone-of-uncertainty geometry. Radii are in kilometers and expand from
+# the current position (30 km) up to the farthest forecast (250 km).
+_KM_PER_DEGREE: float = 111.19  # approximate km per degree of latitude
+_CONE_START_RADIUS_KM: float = 30.0
+_CONE_END_RADIUS_KM: float = 250.0
+_CONE_CAP_SEGMENTS: int = 24  # segments in the rounded end cap
+
+
+def _cone_radius_km(progress: float) -> float:
+    """Return the cone radius in km at track progress 0..1."""
+    return _CONE_START_RADIUS_KM + (
+        _CONE_END_RADIUS_KM - _CONE_START_RADIUS_KM
+    ) * progress
+
+
+def get_category_badge(wind_speed_kph: int | None) -> str:
+    """Return the PAGASA intensity badge for a wind speed in km/h.
+
+    - 'D' for Tropical Depression (up to 61 km/h)
+    - 'S' for Tropical Storm (62-88 km/h)
+    - '🌀' for Severe Tropical Storm, Typhoon, and Super Typhoon
+    - '?' when the wind speed is unknown
+    """
+    if wind_speed_kph is None:
+        return "?"
+    if wind_speed_kph <= 61:
+        return "D"
+    if wind_speed_kph <= 88:
+        return "S"
+    return "🌀"
+
+
+def _format_callout(timestamp: str) -> str:
+    """Format an ISO timestamp as a short callout, e.g. '2AM 6 Nov'."""
+    try:
+        parsed = datetime.fromisoformat(timestamp)
+    except (TypeError, ValueError):
+        return str(timestamp)
+    hour12 = parsed.hour % 12 or 12
+    suffix = "AM" if parsed.hour < 12 else "PM"
+    return f"{hour12}{suffix} {parsed.day} {parsed.strftime('%b')}"
+
+
+def _badge_marker_html(badge: str, callout: str) -> str:
+    """Return DivIcon HTML: a black circular badge with a time callout."""
+    if badge == "🌀":
+        size, font_size = 30, 17
+    elif len(badge) >= 3:
+        size, font_size = 34, 12
+    else:
+        size, font_size = 24, 15
+    return (
+        f'<div style="position:relative; width:{size}px; height:{size + 22}px;">'
+        f'<div style="position:absolute; top:0; left:50%; transform:translateX(-50%);'
+        f' white-space:nowrap; color:#000; font-family:Arial,sans-serif;'
+        f' font-size:12px; font-weight:bold;'
+        f' text-shadow:0 0 3px #fff, 0 0 3px #fff;">{callout}</div>'
+        f'<div style="position:absolute; bottom:0; left:50%; transform:translateX(-50%);'
+        f' width:{size}px; height:{size}px; border-radius:50%; background:#000;'
+        f' color:#fff; display:flex; align-items:center; justify-content:center;'
+        f' font-family:Arial,sans-serif; font-weight:bold;'
+        f' font-size:{font_size}px;">{badge}</div>'
+        f"</div>"
+    )
+
+
+def _add_par_boundary(map_obj: folium.Map) -> None:
+    """Draw the Philippine Area of Responsibility boundary polygon."""
+    folium.Polygon(
+        locations=_PAR_BOUNDARY,
+        color="#808080",
+        weight=1.5,
+        dash_array="5, 5",
+        fill=False,
+        tooltip="Philippine Area of Responsibility (PAR)",
+    ).add_to(map_obj)
+
+
+def _build_cone_envelope(
+    center: dict[str, Any],
+    forecast_points: list[dict[str, Any]],
+) -> list[list[float]]:
+    """Return a [lat, lon] polygon envelope around the forecast track.
+
+    The envelope is the tangent buffer of the track: each waypoint is
+    offset left and right by an expanding radius perpendicular to the
+    path, and a rounded semicircular cap closes the polygon around the
+    final waypoint.
+    """
+    features = [center] + forecast_points
+    coords = [feature["geometry"]["coordinates"] for feature in features]
+    if len(coords) < 2:
+        return []
+
+    # Cumulative along-track distance drives the radius interpolation.
+    cumulative = [0.0]
+    for start, end in zip(coords, coords[1:]):
+        cumulative.append(
+            cumulative[-1]
+            + math.hypot(end[0] - start[0], end[1] - start[1])
+        )
+    total = cumulative[-1] or 1.0
+
+    left_side: list[list[float]] = []
+    right_side: list[list[float]] = []
+    count = len(coords)
+    for index, (lon, lat) in enumerate(coords):
+        if index < count - 1:
+            dx = coords[index + 1][0] - lon
+            dy = coords[index + 1][1] - lat
+        else:
+            dx = lon - coords[index - 1][0]
+            dy = lat - coords[index - 1][1]
+        length = math.hypot(dx, dy)
+        px = -dy / length if length else 0.0
+        py = dx / length if length else 0.0
+        radius = _cone_radius_km(cumulative[index] / total) / _KM_PER_DEGREE
+        left_side.append([lat + py * radius, lon + px * radius])
+        right_side.append([lat - py * radius, lon - px * radius])
+
+    # Rounded cap around the final waypoint: a semicircle bulging ahead
+    # of the track, from the last left offset to the last right offset.
+    end_lon, end_lat = coords[-1]
+    end_radius = _cone_radius_km(1.0) / _KM_PER_DEGREE
+    if count > 1:
+        fdx = coords[-1][0] - coords[-2][0]
+        fdy = coords[-1][1] - coords[-2][1]
+        forward_length = math.hypot(fdx, fdy)
+        fdx /= forward_length or 1.0
+        fdy /= forward_length or 1.0
+    else:
+        fdx, fdy = 0.0, 1.0
+    cap: list[list[float]] = []
+    for step in range(_CONE_CAP_SEGMENTS + 1):
+        theta = math.pi / 2 - math.pi * step / _CONE_CAP_SEGMENTS
+        cap.append(
+            [
+                end_lat + end_radius
+                * (math.cos(theta) * fdy + math.sin(theta) * py),
+                end_lon + end_radius
+                * (math.cos(theta) * fdx + math.sin(theta) * px),
+            ]
+        )
+
+    ring = left_side[:-1] + cap + list(reversed(right_side))[1:]
+    ring.append(ring[0])
+    return ring
+
+
+def _add_cone(
+    map_obj: folium.Map,
+    center: dict[str, Any],
+    forecast_points: list[dict[str, Any]],
 ) -> None:
-    """Draw wind/radar radius rings around the current storm center."""
-    lon, lat = feature["geometry"]["coordinates"]
-    for radius, color, fill_opacity, label in _RADAR_RINGS:
-        folium.Circle(
-            location=[lat, lon],
-            radius=radius,
-            color=color,
-            weight=1,
-            fill=True,
-            fill_color=color,
-            fill_opacity=fill_opacity,
-            tooltip=f"{label} ({radius // 1000} km)",
-        ).add_to(map_obj)
+    """Draw the cone-of-uncertainty envelope around the forecast track."""
+    envelope = _build_cone_envelope(center, forecast_points)
+    if not envelope:
+        return
+    folium.Polygon(
+        locations=envelope,
+        color="#555555",
+        weight=1,
+        fill=True,
+        fill_color="#cccccc",
+        fill_opacity=0.3,
+        tooltip="Cone of uncertainty",
+    ).add_to(map_obj)
+
+
+def _ui_overlay_html(storm_name: str) -> str:
+    """Return the top banner and bottom-left legend overlay HTML."""
+    legend_rows = "".join(
+        f'<div style="display:flex; align-items:center; gap:6px; margin:3px 0;">'
+        f'<span style="width:14px; height:14px; border-radius:50%;'
+        f' background:{color}; display:inline-block;"></span>'
+        f'<span style="width:22px; height:22px; border-radius:50%; background:#000;'
+        f' color:#fff; font-weight:bold; font-size:13px; display:flex;'
+        f' align-items:center; justify-content:center;">{badge}</span>'
+        f'<span style="color:#222;">{label}</span></div>'
+        for badge, color, label in _LEGEND_ENTRIES
+    )
+    return f"""
+<div id="pagasa-ui-overlay">
+  <div id="pagasa-banner">Track and Intensity Forecast of {storm_name}</div>
+  <div id="pagasa-legend">
+    <div style="font-weight:bold; margin-bottom:4px;">Intensity Legend</div>
+    {legend_rows}
+  </div>
+</div>
+<style>
+  #pagasa-banner {{
+    position:absolute; top:12px; left:50%; transform:translateX(-50%);
+    background:#000; color:#fff; font-family:Arial,sans-serif;
+    font-size:15px; font-weight:bold; padding:8px 18px; border-radius:20px;
+    z-index:1000; box-shadow:0 2px 6px rgba(0,0,0,0.4);
+  }}
+  #pagasa-legend {{
+    position:absolute; left:12px; bottom:14px; background:#fff;
+    font-family:Arial,sans-serif; font-size:11px; padding:8px 10px;
+    border:1px solid #ccc; border-radius:6px; z-index:1000;
+    box-shadow:0 2px 6px rgba(0,0,0,0.25);
+  }}
+</style>
+"""
+
+
+def _add_ui_overlay(map_obj: folium.Map, storm_name: str) -> None:
+    """Inject the PAGASA banner and legend overlays."""
+    map_obj.get_root().html.add_child(
+        folium.Element(_ui_overlay_html(storm_name))
+    )
+
+
+def _add_badge_marker(
+    map_obj: folium.Map,
+    lat: float,
+    lon: float,
+    badge: str,
+    callout: str,
+    popup_html: str,
+    tooltip: str,
+) -> None:
+    """Add a PAGASA DivIcon badge marker with a callout and popup."""
+    size = 30 if badge == "🌀" else (34 if len(badge) >= 3 else 24)
+    folium.Marker(
+        location=[lat, lon],
+        popup=folium.Popup(popup_html, max_width=300),
+        tooltip=tooltip,
+        icon=folium.DivIcon(
+            html=_badge_marker_html(badge, callout),
+            icon_size=(size, size + 22),
+            icon_anchor=(size // 2, 22 + size // 2),
+            class_name="",
+        ),
+    ).add_to(map_obj)
 
 
 def _add_center_marker(map_obj: folium.Map, feature: dict[str, Any]) -> None:
-    """Add a marker with a pulsing radar-wave icon for the storm center."""
+    """Add the current position with a PAGASA intensity badge."""
     lon, lat = feature["geometry"]["coordinates"]
     props = feature["properties"]
+    max_wind_kph = props.get("max_wind_kph")
+    wind_speed_kph = int(max_wind_kph) if max_wind_kph is not None else None
     popup_html = (
         f"<b>{props['storm_name']}</b><br>"
         f"Category: {props.get('typhoon_category', 'N/A')}<br>"
         f"Signal: #{props.get('signal_number', 'N/A')}<br>"
-        f"Max winds: {_format_number(props.get('max_wind_kph', 'N/A'))} km/h<br>"
+        f"Max winds: "
+        f"{_format_number(max_wind_kph) if max_wind_kph is not None else 'N/A'}"
+        f" km/h<br>"
         f"Pressure: {_format_number(props.get('pressure', 'N/A'))} hPa<br>"
         f"Issued: {props.get('issued_at', 'N/A')}"
     )
-    folium.Marker(
-        location=[lat, lon],
-        popup=folium.Popup(popup_html, max_width=300),
+    badge = get_category_badge(wind_speed_kph)
+    callout = _format_callout(props.get("issued_at", ""))
+    _add_badge_marker(
+        map_obj,
+        lat,
+        lon,
+        badge,
+        callout,
+        popup_html,
         tooltip=props["storm_name"],
-        icon=folium.DivIcon(
-            html=_RADAR_ICON_HTML,
-            icon_size=(48, 48),
-            icon_anchor=(24, 24),
-        ),
-    ).add_to(map_obj)
+    )
 
 
 def _add_forecast_markers(
     map_obj: folium.Map, forecast_points: list[dict[str, Any]]
 ) -> None:
-    """Add a circle marker for each forecast position."""
+    """Add PAGASA intensity badges with time callouts at forecast points."""
     for feature in forecast_points:
         lon, lat = feature["geometry"]["coordinates"]
         props = feature["properties"]
+        raw_wind = props.get("wind_speed_kph")
+        wind_speed_kph = int(raw_wind) if raw_wind is not None else None
         popup_html = (
             f"Forecast #{props.get('index', '?')}<br>"
-            f"Time: {props.get('timestamp', 'N/A')}"
+            f"Time: {props.get('timestamp', 'N/A')}<br>"
+            f"Max winds: "
+            f"{_format_number(raw_wind) if raw_wind is not None else 'N/A'}"
+            f" km/h"
         )
-        folium.CircleMarker(
-            location=[lat, lon],
-            radius=6,
-            color="orange",
-            fill=True,
-            fill_opacity=0.8,
-            popup=folium.Popup(popup_html, max_width=300),
+        badge = get_category_badge(wind_speed_kph)
+        callout = _format_callout(props.get("timestamp", ""))
+        _add_badge_marker(
+            map_obj,
+            lat,
+            lon,
+            badge,
+            callout,
+            popup_html,
             tooltip="Forecast position",
-        ).add_to(map_obj)
+        )
 
 
 def _add_track_line(
@@ -182,215 +417,34 @@ def _add_track_line(
     ).add_to(map_obj)
 
 
-def _storm_timeline_html() -> str:
-    """Return the timeline slider and cloud layer HTML."""
-    return """
-<div id="storm-controls" style="position:absolute; left:0; top:0; width:100%; height:100%; z-index:400; pointer-events:none;">
-  <canvas id="storm-cloud-layer" width="320" height="320"
-          style="position:absolute; left:0; top:0; width:200px; height:200px; pointer-events:none;"></canvas>
-  <div id="storm-timeline" style="position:absolute; bottom:14px; left:50%; transform:translateX(-50%); z-index:1000; pointer-events:auto; background:rgba(20,25,40,0.82); border-radius:10px; padding:8px 14px 6px; text-align:center; font-family:sans-serif;">
-    <div id="storm-timeline-label" style="color:#fff; font-size:12px; margin-bottom:4px;">0%</div>
-    <input id="storm-timeline-slider" type="range" min="0" max="100" value="0"
-           style="width:260px; accent-color:#00e5ff; cursor:pointer;"
-           aria-label="Storm progression timeline">
-    <div style="color:#9fb0c9; font-size:10px; margin-top:2px;">Drag to scrub storm progression</div>
-  </div>
-</div>
-"""
+# Near-real-time IR satellite imagery from NASA GIBS. The layer uses the
+# MODIS Aqua thermal band 31 (brightness temperature), which shows cloud
+# tops the way PAGASA's Pic 3 satellite view does. The WMTS date is
+# filled in at render time so the map always points at the latest data.
+_SATELLITE_TILE_BASE: str = (
+    "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/"
+    "MODIS_Aqua_Brightness_Temp_Band31_Day/default"
+)
 
 
-def _storm_timeline_js(
-    map_name: str, center: dict[str, Any], track: list[dict[str, Any]] | None
-) -> str:
-    """Return the scrubbable cloud-animation JavaScript.
-
-    The animation follows the oil-motion continuous-control pattern:
-    normalize the slider to a progress value, map it to an integer frame,
-    track it with smoothDamp, and render only when the integer frame
-    changes. A seeded blob field renders a rotating satellite cloud
-    layer whose swirl, size, and opacity develop with storm progress.
-    """
-    center_json = json.dumps(
-        {"lat": center["geometry"]["coordinates"][1],
-         "lon": center["geometry"]["coordinates"][0]}
-    )
-    if track:
-        track_coords = [
-            [lat, lon]
-            for lon, lat in track["geometry"]["coordinates"]
-        ]
-    else:
-        track_coords = []
-    track_json = json.dumps(track_coords)
-    js = """
-(function () {
-  function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
-  function mulberry32(seed) {
-    var a = seed >>> 0;
-    return function () {
-      a |= 0; a = (a + 0x6D2B79F5) | 0;
-      var t = Math.imul(a ^ (a >>> 15), 1 | a);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-  }
-  function smoothDamp(current, target, velocity, smoothTime, maxSpeed, dt) {
-    var safeTime = Math.max(0.0001, smoothTime);
-    var omega = 2 / safeTime;
-    var x = omega * dt;
-    var decay = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
-    var originalTarget = target;
-    var maxChange = maxSpeed * safeTime;
-    var change = clamp(current - target, -maxChange, maxChange);
-    var limitedTarget = current - change;
-    var temp = (velocity + omega * change) * dt;
-    var nextVelocity = (velocity - omega * temp) * decay;
-    var nextPosition = limitedTarget + (change + temp) * decay;
-    if ((originalTarget - current > 0) === (nextPosition > originalTarget)) {
-      nextPosition = originalTarget;
-      nextVelocity = 0;
-    }
-    return [nextPosition, nextVelocity];
-  }
-  function init() {
-    var map = window['__MAP_NAME__'];
-    var slider = document.getElementById('storm-timeline-slider');
-    var label = document.getElementById('storm-timeline-label');
-    var canvas = document.getElementById('storm-cloud-layer');
-    if (!map || !slider || !canvas) return;
-    map.getContainer().appendChild(document.getElementById('storm-controls'));
-    var ctx = canvas.getContext('2d');
-    var W = canvas.width, H = canvas.height;
-    var CX = W / 2, CY = H / 2;
-    var FRAME_COUNT = 24;
-    var center = __CENTER__;
-    var track = __TRACK__;
-    var rand = mulberry32(20241117);
-    var BLOBS = [];
-    for (var i = 0; i < 44; i++) {
-      var r = Math.sqrt(rand()) * W * 0.46;
-      var a = rand() * Math.PI * 2;
-      BLOBS.push({
-        x: CX + Math.cos(a) * r,
-        y: CY + Math.sin(a) * r,
-        r: 8 + rand() * 16,
-        alpha: 0.35 + rand() * 0.45
-      });
-    }
-    function drawFrame(frame) {
-      var progress = frame / (FRAME_COUNT - 1);
-      var phase = progress * Math.PI * 2;
-      var scale = 0.85 + 0.3 * progress;
-      var baseAlpha = 0.5 + 0.4 * progress;
-      ctx.clearRect(0, 0, W, H);
-      for (var i = 0; i < BLOBS.length; i++) {
-        var b = BLOBS[i];
-        var dx = b.x - CX, dy = b.y - CY;
-        var ang = Math.atan2(dy, dx) + phase;
-        var rad = Math.hypot(dx, dy) * scale;
-        var x = CX + Math.cos(ang) * rad;
-        var y = CY + Math.sin(ang) * rad;
-        var radius = b.r * (1.1 + 0.5 * progress);
-        var g = ctx.createRadialGradient(x, y, 0, x, y, radius);
-        g.addColorStop(0, 'rgba(255,255,255,' + (b.alpha * baseAlpha).toFixed(3) + ')');
-        g.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-    function interpolateTrack(t) {
-      if (track.length === 0) return null;
-      if (track.length === 1 || t <= 0) return track[0];
-      if (t >= 1) return track[track.length - 1];
-      var segs = [], total = 0, i;
-      for (i = 1; i < track.length; i++) {
-        var d = Math.hypot(track[i][0] - track[i - 1][0], track[i][1] - track[i - 1][1]);
-        segs.push(d); total += d;
-      }
-      var dist = t * total;
-      for (i = 0; i < segs.length; i++) {
-        if (dist <= segs[i] || i === segs.length - 1) {
-          var f = segs[i] === 0 ? 0 : dist / segs[i];
-          return [track[i][0] + (track[i + 1][0] - track[i][0]) * f,
-                  track[i][1] + (track[i + 1][1] - track[i][1]) * f];
-        }
-        dist -= segs[i];
-      }
-      return track[track.length - 1];
-    }
-    function updateLabel(frame) {
-      var progress = frame / (FRAME_COUNT - 1);
-      var pct = Math.round(progress * 100);
-      var p = interpolateTrack(progress);
-      var posText = p ? p[0].toFixed(1) + 'N, ' + p[1].toFixed(1) + 'E' : '';
-      label.textContent = pct + '%  ' + posText;
-    }
-    var position = 0, target = 0, velocity = 0, lastFrame = -1, raf = 0, lastTime = 0;
-    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    function render() {
-      var frame = Math.round(clamp(position, 0, FRAME_COUNT - 1));
-      if (frame !== lastFrame) {
-        drawFrame(frame);
-        updateLabel(frame);
-        lastFrame = frame;
-      }
-    }
-    function loop(now) {
-      raf = 0;
-      var dt = lastTime ? Math.min((now - lastTime) / 1000, 1 / 30) : 1 / 60;
-      lastTime = now;
-      if (reduced) {
-        position = target;
-        velocity = 0;
-      } else {
-        var result = smoothDamp(position, target, velocity, 0.11, FRAME_COUNT * 2, dt);
-        position = result[0];
-        velocity = result[1];
-      }
-      render();
-      if (Math.abs(target - position) > 0.002 || Math.abs(velocity) > 0.002) {
-        raf = requestAnimationFrame(loop);
-      }
-    }
-    function setProgress(p) {
-      target = clamp(p, 0, 1) * (FRAME_COUNT - 1);
-      if (raf === 0) { lastTime = 0; raf = requestAnimationFrame(loop); }
-    }
-    slider.addEventListener('input', function () {
-      setProgress(slider.value / 100);
-    });
-    function positionCanvas() {
-      var point = map.latLngToContainerPoint([center.lat, center.lon]);
-      canvas.style.left = (point.x - 100) + 'px';
-      canvas.style.top = (point.y - 100) + 'px';
-    }
-    map.on('move zoom resize', positionCanvas);
-    positionCanvas();
-    setProgress(0);
-    render();
-  }
-  setTimeout(init, 0);
-})();
-"""
+def _satellite_tile_url() -> str:
+    """Return the GIBS IR satellite tile URL for the current date."""
+    date = datetime.now().strftime("%Y-%m-%d")
     return (
-        js.replace("__MAP_NAME__", map_name)
-        .replace("__CENTER__", center_json)
-        .replace("__TRACK__", track_json)
+        f"{_SATELLITE_TILE_BASE}/{date}/GoogleMapsCompatible_Level7/"
+        "{{z}}/{{y}}/{{x}}.png"
     )
 
 
-def _add_timeline(
-    map_obj: folium.Map,
-    center: dict[str, Any],
-    track: dict[str, Any] | None,
-) -> None:
-    """Inject the timeline slider and scrubbable cloud layer."""
-    map_obj.get_root().html.add_child(folium.Element(_storm_timeline_html()))
-    map_obj.get_root().script.add_child(
-        folium.Element(_storm_timeline_js(map_obj.get_name(), center, track))
-    )
+def _add_satellite_layer(map_obj: folium.Map) -> None:
+    """Add the optional IR satellite tile layer for the layer control."""
+    folium.TileLayer(
+        tiles=_satellite_tile_url(),
+        name="IR Satellite (MODIS Aqua)",
+        attr="Imagery &copy; NASA GIBS",
+        min_zoom=4,
+        max_zoom=9,
+    ).add_to(map_obj)
 
 
 def render_map(geojson_path: str, output_html_path: str) -> folium.Map:
@@ -399,13 +453,20 @@ def render_map(geojson_path: str, output_html_path: str) -> folium.Map:
     center, forecast_points, track = _split_features(collection)
 
     center_lon, center_lat = center["geometry"]["coordinates"]
-    map_obj = folium.Map(location=[center_lat, center_lon], zoom_start=6)
+    map_obj = folium.Map(
+        location=[center_lat, center_lon],
+        zoom_start=6,
+        tiles="CartoDB positron",
+    )
 
-    _add_radar_rings(map_obj, center)
+    _add_par_boundary(map_obj)
+    _add_cone(map_obj, center, forecast_points)
+    _add_track_line(map_obj, track)
     _add_center_marker(map_obj, center)
     _add_forecast_markers(map_obj, forecast_points)
-    _add_track_line(map_obj, track)
-    _add_timeline(map_obj, center, track)
+    _add_satellite_layer(map_obj)
+    _add_ui_overlay(map_obj, center["properties"]["storm_name"])
+    folium.LayerControl().add_to(map_obj)
 
     map_obj.save(output_html_path)
     return map_obj
