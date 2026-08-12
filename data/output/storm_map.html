@@ -17,7 +17,7 @@
             <meta name="viewport" content="width=device-width,
                 initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             <style>
-                #map_09b74688c1726209f48962d82421911c {
+                #map_e73e32233b8a85087ce8118bb0cf6beb {
                     position: relative;
                     width: 100.0%;
                     height: 100.0%;
@@ -50,6 +50,7 @@
             </script>
 
         
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-ant-path@1.1.2/dist/leaflet-ant-path.min.js"></script>
 </head>
 <body>
     
@@ -115,14 +116,14 @@
   })();
 </script>
     
-            <div class="folium-map" id="map_09b74688c1726209f48962d82421911c" ></div>
+            <div class="folium-map" id="map_e73e32233b8a85087ce8118bb0cf6beb" ></div>
         
 </body>
 <script>
     
     
-            var map_09b74688c1726209f48962d82421911c = L.map(
-                "map_09b74688c1726209f48962d82421911c",
+            var map_e73e32233b8a85087ce8118bb0cf6beb = L.map(
+                "map_e73e32233b8a85087ce8118bb0cf6beb",
                 {
                     center: [14.6, 121.0],
                     crs: L.CRS.EPSG3857,
@@ -139,7 +140,7 @@
 
         
     
-            var tile_layer_6a6fd514d67d0677c514c25f115ec7bb = L.tileLayer(
+            var tile_layer_09307bfca5c6184d310c88770530991d = L.tileLayer(
                 "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
                 {
   "minZoom": 0,
@@ -156,16 +157,16 @@
             );
         
     
-            tile_layer_6a6fd514d67d0677c514c25f115ec7bb.addTo(map_09b74688c1726209f48962d82421911c);
+            tile_layer_09307bfca5c6184d310c88770530991d.addTo(map_e73e32233b8a85087ce8118bb0cf6beb);
         
     
-            var polygon_0c8f810f812ca1c1dde39a1b06f49202 = L.polygon(
+            var polygon_a2aa870aa277900c2a08f2f8b28bab7e = L.polygon(
                 [[25.0, 120.0], [25.0, 135.0], [5.0, 135.0], [5.0, 115.0], [15.0, 115.0], [21.0, 120.0]],
                 {"bubblingMouseEvents": true, "color": "#808080", "dashArray": "5, 5", "dashOffset": null, "fill": false, "fillColor": "#808080", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 1.5}
-            ).addTo(map_09b74688c1726209f48962d82421911c);
+            ).addTo(map_e73e32233b8a85087ce8118bb0cf6beb);
         
     
-            polygon_0c8f810f812ca1c1dde39a1b06f49202.bindTooltip(
+            polygon_a2aa870aa277900c2a08f2f8b28bab7e.bindTooltip(
                 `<div>
                      Philippine Area of Responsibility (PAR)
                  </div>`,
@@ -175,39 +176,95 @@
             );
         
     
-            var marker_753796c4cb5f3c0c0c9cc465297a413a = L.marker(
+            var polygon_87d79d79fa1ec45442c6b866686b23d2 = L.polygon(
+                [[14.350946059067292, 120.89622752461138], [14.380370780863322, 119.57857562488101], [14.9530264916659, 115.71189877261786], [15.7928871926586, 114.60310844560638], [16.05080824171223, 114.46177677749074], [16.324970224915834, 114.35531967381446], [16.610682154724742, 114.28555864513694], [16.903055420805607, 114.25368732200027], [17.197087435514604, 114.26025103157971], [17.487747229558984, 114.30513746698455], [17.770061533276532, 114.38757860886014], [18.039199870658326, 114.50616386641198], [18.29055721013252, 114.65886421300534], [18.519832757931287, 114.84306690337345], [18.723103545864603, 115.05562017841348], [18.89689155439362, 115.2928871926586], [19.038223222509263, 115.55080824171223], [19.144680326185537, 115.82497022491583], [19.21444135486305, 116.11068215472474], [19.246312677999725, 116.4030554208056], [19.23974896842029, 116.6970874355146], [19.194862533015453, 116.98774722955899], [19.11242139113986, 117.27006153327653], [18.99383613358801, 117.53919987065832], [18.84113578699466, 117.79055721013252], [18.656933096626553, 118.01983275793128], [18.44437982158652, 118.2231035458646], [18.2071128073414, 118.39689155439362], [16.846973508334102, 118.68810122738215], [15.819629219136678, 120.02142437511898], [14.849053940932707, 121.10377247538862], [14.350946059067292, 120.89622752461138]],
+                {"bubblingMouseEvents": true, "color": "#555555", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#cccccc", "fillOpacity": 0.3, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 1}
+            ).addTo(map_e73e32233b8a85087ce8118bb0cf6beb);
+        
+    
+            polygon_87d79d79fa1ec45442c6b866686b23d2.bindTooltip(
+                `<div>
+                     Cone of uncertainty
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            ant_path_5c359b156b96a7bc42938ef86b5ea73f = L.polyline.antPath(
+              [[14.6, 121.0], [15.1, 119.8], [15.9, 117.2], [17.0, 116.5]],
+              {
+  "stroke": true,
+  "color": "blue",
+  "weight": 3,
+  "opacity": 0.5,
+  "lineCap": "round",
+  "lineJoin": "round",
+  "dashArray": [
+10,
+20,
+],
+  "dashOffset": null,
+  "fill": false,
+  "fillColor": "blue",
+  "fillOpacity": 0.2,
+  "fillRule": "evenodd",
+  "bubblingMouseEvents": true,
+  "smoothFactor": 1.0,
+  "noClip": false,
+  "paused": false,
+  "reverse": false,
+  "hardwareAcceleration": false,
+  "delay": 1000,
+  "pulseColor": "#FFFFFF",
+}
+        ).addTo(map_e73e32233b8a85087ce8118bb0cf6beb);
+        
+    
+            ant_path_5c359b156b96a7bc42938ef86b5ea73f.bindTooltip(
+                `<div>
+                     Storm track
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_8c37f57548f042f1d36147a50fec42f2 = L.marker(
                 [14.6, 121.0],
                 {
 }
-            ).addTo(map_09b74688c1726209f48962d82421911c);
+            ).addTo(map_e73e32233b8a85087ce8118bb0cf6beb);
         
     
-            var div_icon_68de76db204d627b9bfe65316fad1caa = L.divIcon({
-  "html": "\u003cdiv style=\"position:relative; width:24px; height:46px;\"\u003e\u003cdiv style=\"position:absolute; top:0; left:50%; transform:translateX(-50%); white-space:nowrap; color:#000; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; text-shadow:0 0 3px #fff, 0 0 3px #fff;\"\u003e6PM 12 Aug\u003c/div\u003e\u003cdiv style=\"position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:24px; height:24px; border-radius:50%; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; font-family:Arial,sans-serif; font-weight:bold; font-size:15px;\"\u003eD\u003c/div\u003e\u003c/div\u003e",
+            var div_icon_5aee45f6369bb81f22d2bcc51b33be49 = L.divIcon({
+  "html": "\u003cdiv style=\"position:relative; width:24px; height:46px;\"\u003e\u003cdiv style=\"position:absolute; top:0; left:50%; transform:translateX(-50%); white-space:nowrap; color:#000; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; text-shadow:0 0 3px #fff, 0 0 3px #fff;\"\u003e7PM 12 Aug\u003c/div\u003e\u003cdiv style=\"position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:24px; height:24px; border-radius:50%; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; font-family:Arial,sans-serif; font-weight:bold; font-size:15px;\"\u003eD\u003c/div\u003e\u003c/div\u003e",
   "iconSize": [24, 46],
   "iconAnchor": [12, 34],
   "className": "",
 });
         
     
-        var popup_1881ad0ab761f2312dd53025991fd29c = L.popup({
+        var popup_492df584367a66331f80964bd0c5857d = L.popup({
   "maxWidth": 300,
 });
 
         
             
-                var html_be900143d0576353a8b989854bb70749 = $(`<div id="html_be900143d0576353a8b989854bb70749" style="width: 100.0%; height: 100.0%;"><b>Maymay</b><br>Category: Tropical Depression<br>Signal: #1<br>Max winds: 55 km/h<br>Pressure: 1000 hPa<br>Issued: 2026-08-12T18:09:22+08:00</div>`)[0];
-                popup_1881ad0ab761f2312dd53025991fd29c.setContent(html_be900143d0576353a8b989854bb70749);
+                var html_6db13dc4ee04301877b04b0823867fcd = $(`<div id="html_6db13dc4ee04301877b04b0823867fcd" style="width: 100.0%; height: 100.0%;"><b>Maymay</b><br>Category: Tropical Depression<br>Signal: #1<br>Max winds: 55 km/h<br>Pressure: 1000 hPa<br>Issued: 2026-08-12T19:49:14+08:00</div>`)[0];
+                popup_492df584367a66331f80964bd0c5857d.setContent(html_6db13dc4ee04301877b04b0823867fcd);
             
         
 
-        marker_753796c4cb5f3c0c0c9cc465297a413a.bindPopup(popup_1881ad0ab761f2312dd53025991fd29c)
+        marker_8c37f57548f042f1d36147a50fec42f2.bindPopup(popup_492df584367a66331f80964bd0c5857d)
         ;
 
         
     
     
-            marker_753796c4cb5f3c0c0c9cc465297a413a.bindTooltip(
+            marker_8c37f57548f042f1d36147a50fec42f2.bindTooltip(
                 `<div>
                      Maymay
                  </div>`,
@@ -217,10 +274,145 @@
             );
         
     
-                marker_753796c4cb5f3c0c0c9cc465297a413a.setIcon(div_icon_68de76db204d627b9bfe65316fad1caa);
+                marker_8c37f57548f042f1d36147a50fec42f2.setIcon(div_icon_5aee45f6369bb81f22d2bcc51b33be49);
             
     
-            var tile_layer_f86600b97e4c6385e95fede6b7ee1200 = L.tileLayer(
+            var marker_798baa40dbddeab8c994ba329d76f371 = L.marker(
+                [15.1, 119.8],
+                {
+}
+            ).addTo(map_e73e32233b8a85087ce8118bb0cf6beb);
+        
+    
+            var div_icon_d8f1eee8a2158c157ec529ac18adf499 = L.divIcon({
+  "html": "\u003cdiv style=\"position:relative; width:24px; height:46px;\"\u003e\u003cdiv style=\"position:absolute; top:0; left:50%; transform:translateX(-50%); white-space:nowrap; color:#000; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; text-shadow:0 0 3px #fff, 0 0 3px #fff;\"\u003e7AM 13 Aug\u003c/div\u003e\u003cdiv style=\"position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:24px; height:24px; border-radius:50%; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; font-family:Arial,sans-serif; font-weight:bold; font-size:15px;\"\u003e?\u003c/div\u003e\u003c/div\u003e",
+  "iconSize": [24, 46],
+  "iconAnchor": [12, 34],
+  "className": "",
+});
+        
+    
+        var popup_9d886654fa9be83bc54e44d356f39467 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_8a35ecdd313fdfb3a418e09f8bf2d5db = $(`<div id="html_8a35ecdd313fdfb3a418e09f8bf2d5db" style="width: 100.0%; height: 100.0%;">Forecast #0<br>Time: 2026-08-13T07:00:00+08:00<br>Max winds: N/A km/h</div>`)[0];
+                popup_9d886654fa9be83bc54e44d356f39467.setContent(html_8a35ecdd313fdfb3a418e09f8bf2d5db);
+            
+        
+
+        marker_798baa40dbddeab8c994ba329d76f371.bindPopup(popup_9d886654fa9be83bc54e44d356f39467)
+        ;
+
+        
+    
+    
+            marker_798baa40dbddeab8c994ba329d76f371.bindTooltip(
+                `<div>
+                     Forecast position
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_798baa40dbddeab8c994ba329d76f371.setIcon(div_icon_d8f1eee8a2158c157ec529ac18adf499);
+            
+    
+            var marker_29713203717a670c224ba250d03401de = L.marker(
+                [15.9, 117.2],
+                {
+}
+            ).addTo(map_e73e32233b8a85087ce8118bb0cf6beb);
+        
+    
+            var div_icon_71f22d00c964e5c216448a5d4aa8db83 = L.divIcon({
+  "html": "\u003cdiv style=\"position:relative; width:24px; height:46px;\"\u003e\u003cdiv style=\"position:absolute; top:0; left:50%; transform:translateX(-50%); white-space:nowrap; color:#000; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; text-shadow:0 0 3px #fff, 0 0 3px #fff;\"\u003e7AM 14 Aug\u003c/div\u003e\u003cdiv style=\"position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:24px; height:24px; border-radius:50%; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; font-family:Arial,sans-serif; font-weight:bold; font-size:15px;\"\u003e?\u003c/div\u003e\u003c/div\u003e",
+  "iconSize": [24, 46],
+  "iconAnchor": [12, 34],
+  "className": "",
+});
+        
+    
+        var popup_57e0c95c06faf9d60cbb33c0aea82e49 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_9430d9645adb820600b2640e160750bd = $(`<div id="html_9430d9645adb820600b2640e160750bd" style="width: 100.0%; height: 100.0%;">Forecast #1<br>Time: 2026-08-14T07:00:00+08:00<br>Max winds: N/A km/h</div>`)[0];
+                popup_57e0c95c06faf9d60cbb33c0aea82e49.setContent(html_9430d9645adb820600b2640e160750bd);
+            
+        
+
+        marker_29713203717a670c224ba250d03401de.bindPopup(popup_57e0c95c06faf9d60cbb33c0aea82e49)
+        ;
+
+        
+    
+    
+            marker_29713203717a670c224ba250d03401de.bindTooltip(
+                `<div>
+                     Forecast position
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_29713203717a670c224ba250d03401de.setIcon(div_icon_71f22d00c964e5c216448a5d4aa8db83);
+            
+    
+            var marker_b1ad46c6484ec6ff265d51d5e443dae6 = L.marker(
+                [17.0, 116.5],
+                {
+}
+            ).addTo(map_e73e32233b8a85087ce8118bb0cf6beb);
+        
+    
+            var div_icon_d982807cbfe5b788b360633b94b7a3e8 = L.divIcon({
+  "html": "\u003cdiv style=\"position:relative; width:24px; height:46px;\"\u003e\u003cdiv style=\"position:absolute; top:0; left:50%; transform:translateX(-50%); white-space:nowrap; color:#000; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; text-shadow:0 0 3px #fff, 0 0 3px #fff;\"\u003e7AM 15 Aug\u003c/div\u003e\u003cdiv style=\"position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:24px; height:24px; border-radius:50%; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; font-family:Arial,sans-serif; font-weight:bold; font-size:15px;\"\u003e?\u003c/div\u003e\u003c/div\u003e",
+  "iconSize": [24, 46],
+  "iconAnchor": [12, 34],
+  "className": "",
+});
+        
+    
+        var popup_16b712df7f9cacb624c7fa5d8f0cfd84 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_31be5ae2a03b6f40512a24eea0a3454c = $(`<div id="html_31be5ae2a03b6f40512a24eea0a3454c" style="width: 100.0%; height: 100.0%;">Forecast #2<br>Time: 2026-08-15T07:00:00+08:00<br>Max winds: N/A km/h</div>`)[0];
+                popup_16b712df7f9cacb624c7fa5d8f0cfd84.setContent(html_31be5ae2a03b6f40512a24eea0a3454c);
+            
+        
+
+        marker_b1ad46c6484ec6ff265d51d5e443dae6.bindPopup(popup_16b712df7f9cacb624c7fa5d8f0cfd84)
+        ;
+
+        
+    
+    
+            marker_b1ad46c6484ec6ff265d51d5e443dae6.bindTooltip(
+                `<div>
+                     Forecast position
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_b1ad46c6484ec6ff265d51d5e443dae6.setIcon(div_icon_d982807cbfe5b788b360633b94b7a3e8);
+            
+    
+            var tile_layer_8153b7f913537e2f88ba601b7516d972 = L.tileLayer(
                 "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Aqua_Brightness_Temp_Band31_Day/default/2026-08-12/GoogleMapsCompatible_Level7///.png",
                 {
   "minZoom": 4,
@@ -237,26 +429,26 @@
             );
         
     
-            tile_layer_f86600b97e4c6385e95fede6b7ee1200.addTo(map_09b74688c1726209f48962d82421911c);
+            tile_layer_8153b7f913537e2f88ba601b7516d972.addTo(map_e73e32233b8a85087ce8118bb0cf6beb);
         
     
-            var layer_control_c8aae1811280c277747678029d8aa313_layers = {
+            var layer_control_503f824d10d222196ac7699b6cf3487d_layers = {
                 base_layers : {
-                    "cartodbpositron" : tile_layer_6a6fd514d67d0677c514c25f115ec7bb,
-                    "IR Satellite (MODIS Aqua)" : tile_layer_f86600b97e4c6385e95fede6b7ee1200,
+                    "cartodbpositron" : tile_layer_09307bfca5c6184d310c88770530991d,
+                    "IR Satellite (MODIS Aqua)" : tile_layer_8153b7f913537e2f88ba601b7516d972,
                 },
                 overlays :  {
                 },
             };
-            let layer_control_c8aae1811280c277747678029d8aa313 = L.control.layers(
-                layer_control_c8aae1811280c277747678029d8aa313_layers.base_layers,
-                layer_control_c8aae1811280c277747678029d8aa313_layers.overlays,
+            let layer_control_503f824d10d222196ac7699b6cf3487d = L.control.layers(
+                layer_control_503f824d10d222196ac7699b6cf3487d_layers.base_layers,
+                layer_control_503f824d10d222196ac7699b6cf3487d_layers.overlays,
                 {
   "position": "topright",
   "collapsed": true,
   "autoZIndex": true,
 }
-            ).addTo(map_09b74688c1726209f48962d82421911c);
+            ).addTo(map_e73e32233b8a85087ce8118bb0cf6beb);
 
         
 </script>
