@@ -264,6 +264,16 @@ class TestUiOverlay:
         for color in ("#FFD700", "#008000", "#FFA500", "#FF0000", "#800080"):
             assert color in html
 
+    def test_about_button_and_panel(self, storm_geojson, tmp_path):
+        output = tmp_path / "storm_map.html"
+        render_map(storm_geojson, str(output))
+        html = output.read_text(encoding="utf-8")
+
+        assert 'id="pagasa-about-btn"' in html
+        assert 'id="pagasa-about"' in html
+        assert "PAGASA Track Agent" in html
+        assert "not an official forecast" in html
+
 
 class TestRenderMap:
     def test_creates_html_file(self, storm_geojson, tmp_path):

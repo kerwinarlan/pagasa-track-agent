@@ -2,6 +2,16 @@
 
 Structured Storm Tracking Pipeline
 
+## About
+
+PAGASA Track Agent converts official PAGASA Severe Weather Bulletins into
+structured, validated, and visualizable storm tracking data. It parses
+bulletin text with DeepSeek and Instructor, validates the result with
+Pydantic v2, exports it as GeoJSON, and renders an interactive Leaflet map.
+
+Source: PAGASA-DOST. The maps are for visualization only and are not
+official forecasts.
+
 ## Overview
 
 PAGASA Track Agent converts raw PAGASA Severe Weather Bulletin text into
