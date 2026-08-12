@@ -17,7 +17,7 @@
             <meta name="viewport" content="width=device-width,
                 initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             <style>
-                #map_5908e059edb7fcac4d75c1c67d734ce0 {
+                #map_cfc64152b74266976100f0729c955522 {
                     position: relative;
                     width: 100.0%;
                     height: 100.0%;
@@ -50,13 +50,12 @@
             </script>
 
         
-    <script src="https://cdn.jsdelivr.net/npm/leaflet-ant-path@1.1.2/dist/leaflet-ant-path.min.js"></script>
 </head>
 <body>
     
     
 <div id="pagasa-ui-overlay">
-  <div id="pagasa-banner">Track and Intensity Forecast of Maymay</div>
+  <div id="pagasa-banner">Track and Intensity Forecast of Unknown</div>
   <div id="pagasa-legend">
     <div style="font-weight:bold; margin-bottom:4px;">Intensity Legend</div>
     <div style="display:flex; align-items:center; gap:6px; margin:3px 0;"><span style="width:14px; height:14px; border-radius:50%; background:#FFD700; display:inline-block;"></span><span style="width:22px; height:22px; border-radius:50%; background:#000; color:#fff; font-weight:bold; font-size:13px; display:flex; align-items:center; justify-content:center;">D</span><span style="color:#222;">Tropical Depression (<= 61 km/h)</span></div><div style="display:flex; align-items:center; gap:6px; margin:3px 0;"><span style="width:14px; height:14px; border-radius:50%; background:#008000; display:inline-block;"></span><span style="width:22px; height:22px; border-radius:50%; background:#000; color:#fff; font-weight:bold; font-size:13px; display:flex; align-items:center; justify-content:center;">S</span><span style="color:#222;">Tropical Storm (62-88 km/h)</span></div><div style="display:flex; align-items:center; gap:6px; margin:3px 0;"><span style="width:14px; height:14px; border-radius:50%; background:#FFA500; display:inline-block;"></span><span style="width:22px; height:22px; border-radius:50%; background:#000; color:#fff; font-weight:bold; font-size:13px; display:flex; align-items:center; justify-content:center;">🌀</span><span style="color:#222;">Severe Tropical Storm (89-117 km/h)</span></div><div style="display:flex; align-items:center; gap:6px; margin:3px 0;"><span style="width:14px; height:14px; border-radius:50%; background:#FF0000; display:inline-block;"></span><span style="width:22px; height:22px; border-radius:50%; background:#000; color:#fff; font-weight:bold; font-size:13px; display:flex; align-items:center; justify-content:center;">🌀</span><span style="color:#222;">Typhoon (118-184 km/h)</span></div><div style="display:flex; align-items:center; gap:6px; margin:3px 0;"><span style="width:14px; height:14px; border-radius:50%; background:#800080; display:inline-block;"></span><span style="width:22px; height:22px; border-radius:50%; background:#000; color:#fff; font-weight:bold; font-size:13px; display:flex; align-items:center; justify-content:center;">🌀</span><span style="color:#222;">Super Typhoon (>= 185 km/h)</span></div>
@@ -116,16 +115,16 @@
   })();
 </script>
     
-            <div class="folium-map" id="map_5908e059edb7fcac4d75c1c67d734ce0" ></div>
+            <div class="folium-map" id="map_cfc64152b74266976100f0729c955522" ></div>
         
 </body>
 <script>
     
     
-            var map_5908e059edb7fcac4d75c1c67d734ce0 = L.map(
-                "map_5908e059edb7fcac4d75c1c67d734ce0",
+            var map_cfc64152b74266976100f0729c955522 = L.map(
+                "map_cfc64152b74266976100f0729c955522",
                 {
-                    center: [15.0, 125.0],
+                    center: [25.0, 127.0],
                     crs: L.CRS.EPSG3857,
                     ...{
   "zoom": 6,
@@ -140,7 +139,7 @@
 
         
     
-            var tile_layer_0d61dc3fbc673099ec34a86ecfcbe170 = L.tileLayer(
+            var tile_layer_ac7ebbfcb561e52c0e51852bfe0c7826 = L.tileLayer(
                 "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
                 {
   "minZoom": 0,
@@ -157,16 +156,16 @@
             );
         
     
-            tile_layer_0d61dc3fbc673099ec34a86ecfcbe170.addTo(map_5908e059edb7fcac4d75c1c67d734ce0);
+            tile_layer_ac7ebbfcb561e52c0e51852bfe0c7826.addTo(map_cfc64152b74266976100f0729c955522);
         
     
-            var polygon_a47592f328413cb21d230d6b77ea638a = L.polygon(
+            var polygon_e6d1714a41f0433119534fbf5cb72812 = L.polygon(
                 [[25.0, 120.0], [25.0, 135.0], [5.0, 135.0], [5.0, 115.0], [15.0, 115.0], [21.0, 120.0]],
                 {"bubblingMouseEvents": true, "color": "#808080", "dashArray": "5, 5", "dashOffset": null, "fill": false, "fillColor": "#808080", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 1.5}
-            ).addTo(map_5908e059edb7fcac4d75c1c67d734ce0);
+            ).addTo(map_cfc64152b74266976100f0729c955522);
         
     
-            polygon_a47592f328413cb21d230d6b77ea638a.bindTooltip(
+            polygon_e6d1714a41f0433119534fbf5cb72812.bindTooltip(
                 `<div>
                      Philippine Area of Responsibility (PAR)
                  </div>`,
@@ -176,70 +175,14 @@
             );
         
     
-            var polygon_227355d7c987877c887a63f2d3bda210 = L.polygon(
-                [[14.768641174823488, 124.8611847048941], [15.420325482509613, 121.85219528950577], [16.072009790195736, 118.84320587411744], [16.239495946144523, 118.60144918750304], [16.43710481455871, 118.383622093042], [16.661455252912212, 118.19345167271364], [16.908708563003096, 118.03419179513496], [17.17463417214415, 117.90856744096652], [17.454682019434454, 117.81872807773782], [17.74406040856294, 117.76621088186182], [18.037817995060777, 117.75191443712053], [18.330928505177994, 117.77608335964719], [18.618376736820903, 117.83830411247645], [18.89524437105038, 117.93751208127658], [19.15679412588256, 118.07200979019574], [19.39855081249696, 118.23949594614452], [19.616377906957997, 118.43710481455871], [19.806548327286364, 118.6614552529122], [19.96580820486504, 118.9087085630031], [20.091432559033475, 119.17463417214415], [20.18127192226219, 119.45468201943446], [20.23378911813817, 119.74406040856294], [20.24808556287946, 120.03781799506078], [20.22391664035281, 120.330928505178], [20.161695887523546, 120.6183767368209], [20.062487918723427, 120.89524437105038], [19.927990209804264, 121.15679412588256], [17.57967451749039, 123.14780471049423], [15.231358825176512, 125.1388152951059], [14.768641174823488, 124.8611847048941]],
-                {"bubblingMouseEvents": true, "color": "#555555", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#cccccc", "fillOpacity": 0.3, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 1}
-            ).addTo(map_5908e059edb7fcac4d75c1c67d734ce0);
-        
-    
-            polygon_227355d7c987877c887a63f2d3bda210.bindTooltip(
-                `<div>
-                     Cone of uncertainty
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-            ant_path_7984948f06964c6638aa5801f3320843 = L.polyline.antPath(
-              [[15.0, 125.0], [16.5, 122.5], [18.0, 120.0]],
-              {
-  "stroke": true,
-  "color": "blue",
-  "weight": 3,
-  "opacity": 0.5,
-  "lineCap": "round",
-  "lineJoin": "round",
-  "dashArray": [
-10,
-20,
-],
-  "dashOffset": null,
-  "fill": false,
-  "fillColor": "blue",
-  "fillOpacity": 0.2,
-  "fillRule": "evenodd",
-  "bubblingMouseEvents": true,
-  "smoothFactor": 1.0,
-  "noClip": false,
-  "paused": false,
-  "reverse": false,
-  "hardwareAcceleration": false,
-  "delay": 1000,
-  "pulseColor": "#FFFFFF",
-}
-        ).addTo(map_5908e059edb7fcac4d75c1c67d734ce0);
-        
-    
-            ant_path_7984948f06964c6638aa5801f3320843.bindTooltip(
-                `<div>
-                     Storm track
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-            var marker_3ec25508d870ce222b25921f5b5b38ca = L.marker(
-                [15.0, 125.0],
+            var marker_0460ed501b7fc00ddc8af336ca5c3fee = L.marker(
+                [25.0, 127.0],
                 {
 }
-            ).addTo(map_5908e059edb7fcac4d75c1c67d734ce0);
+            ).addTo(map_cfc64152b74266976100f0729c955522);
         
     
-            var div_icon_86ff4513d18288dee63f87e3d2cdfe10 = L.divIcon({
+            var div_icon_7ff3004c99920745bd22414095e5eed0 = L.divIcon({
   "html": "\u003cdiv style=\"position:relative; width:24px; height:46px;\"\u003e\u003cdiv style=\"position:absolute; top:0; left:50%; transform:translateX(-50%); white-space:nowrap; color:#000; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; text-shadow:0 0 3px #fff, 0 0 3px #fff;\"\u003e12AM 13 Aug\u003c/div\u003e\u003cdiv style=\"position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:24px; height:24px; border-radius:50%; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; font-family:Arial,sans-serif; font-weight:bold; font-size:15px;\"\u003eD\u003c/div\u003e\u003c/div\u003e",
   "iconSize": [24, 46],
   "iconAnchor": [12, 34],
@@ -247,26 +190,26 @@
 });
         
     
-        var popup_410291dc11c12f46634e29ca24bddfa1 = L.popup({
+        var popup_ba13eb84641425d12f8e3b0c164ebe28 = L.popup({
   "maxWidth": 300,
 });
 
         
             
-                var html_325fa69288cf92a49e9cc36d59c1e07a = $(`<div id="html_325fa69288cf92a49e9cc36d59c1e07a" style="width: 100.0%; height: 100.0%;"><b>Maymay</b><br>Category: Tropical Depression<br>Signal: #1<br>Max winds: 55 km/h<br>Pressure: 1000 hPa<br>Issued: 2026-08-13T00:00:00+08:00</div>`)[0];
-                popup_410291dc11c12f46634e29ca24bddfa1.setContent(html_325fa69288cf92a49e9cc36d59c1e07a);
+                var html_2801a7f050453d43cb281197a24bc9dc = $(`<div id="html_2801a7f050453d43cb281197a24bc9dc" style="width: 100.0%; height: 100.0%;"><b>Unknown</b><br>Category: Tropical Depression<br>Signal: #1<br>Max winds: 1 km/h<br>Pressure: 1 hPa<br>Issued: 2026-08-13T00:00:00+08:00</div>`)[0];
+                popup_ba13eb84641425d12f8e3b0c164ebe28.setContent(html_2801a7f050453d43cb281197a24bc9dc);
             
         
 
-        marker_3ec25508d870ce222b25921f5b5b38ca.bindPopup(popup_410291dc11c12f46634e29ca24bddfa1)
+        marker_0460ed501b7fc00ddc8af336ca5c3fee.bindPopup(popup_ba13eb84641425d12f8e3b0c164ebe28)
         ;
 
         
     
     
-            marker_3ec25508d870ce222b25921f5b5b38ca.bindTooltip(
+            marker_0460ed501b7fc00ddc8af336ca5c3fee.bindTooltip(
                 `<div>
-                     Maymay
+                     Unknown
                  </div>`,
                 {
   "sticky": true,
@@ -274,100 +217,10 @@
             );
         
     
-                marker_3ec25508d870ce222b25921f5b5b38ca.setIcon(div_icon_86ff4513d18288dee63f87e3d2cdfe10);
+                marker_0460ed501b7fc00ddc8af336ca5c3fee.setIcon(div_icon_7ff3004c99920745bd22414095e5eed0);
             
     
-            var marker_3079e952c72f44351da3447145047ab0 = L.marker(
-                [16.5, 122.5],
-                {
-}
-            ).addTo(map_5908e059edb7fcac4d75c1c67d734ce0);
-        
-    
-            var div_icon_b3e4c99aacce6b660be424ed1fcd7cec = L.divIcon({
-  "html": "\u003cdiv style=\"position:relative; width:24px; height:46px;\"\u003e\u003cdiv style=\"position:absolute; top:0; left:50%; transform:translateX(-50%); white-space:nowrap; color:#000; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; text-shadow:0 0 3px #fff, 0 0 3px #fff;\"\u003e12AM 14 Aug\u003c/div\u003e\u003cdiv style=\"position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:24px; height:24px; border-radius:50%; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; font-family:Arial,sans-serif; font-weight:bold; font-size:15px;\"\u003e?\u003c/div\u003e\u003c/div\u003e",
-  "iconSize": [24, 46],
-  "iconAnchor": [12, 34],
-  "className": "",
-});
-        
-    
-        var popup_1f1bf197d3eca7afbe58776adf7cbf69 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_33e6652ce8ab9449caf91ca63fdf9dcb = $(`<div id="html_33e6652ce8ab9449caf91ca63fdf9dcb" style="width: 100.0%; height: 100.0%;">Forecast #0<br>Time: 2026-08-14T00:00:00+08:00<br>Max winds: N/A km/h</div>`)[0];
-                popup_1f1bf197d3eca7afbe58776adf7cbf69.setContent(html_33e6652ce8ab9449caf91ca63fdf9dcb);
-            
-        
-
-        marker_3079e952c72f44351da3447145047ab0.bindPopup(popup_1f1bf197d3eca7afbe58776adf7cbf69)
-        ;
-
-        
-    
-    
-            marker_3079e952c72f44351da3447145047ab0.bindTooltip(
-                `<div>
-                     Forecast position
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_3079e952c72f44351da3447145047ab0.setIcon(div_icon_b3e4c99aacce6b660be424ed1fcd7cec);
-            
-    
-            var marker_7b15e5472003358ae372b64d5d566dff = L.marker(
-                [18.0, 120.0],
-                {
-}
-            ).addTo(map_5908e059edb7fcac4d75c1c67d734ce0);
-        
-    
-            var div_icon_fd4a23269d9e22a6b5c37e87654ade96 = L.divIcon({
-  "html": "\u003cdiv style=\"position:relative; width:24px; height:46px;\"\u003e\u003cdiv style=\"position:absolute; top:0; left:50%; transform:translateX(-50%); white-space:nowrap; color:#000; font-family:Arial,sans-serif; font-size:12px; font-weight:bold; text-shadow:0 0 3px #fff, 0 0 3px #fff;\"\u003e12AM 15 Aug\u003c/div\u003e\u003cdiv style=\"position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:24px; height:24px; border-radius:50%; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; font-family:Arial,sans-serif; font-weight:bold; font-size:15px;\"\u003e?\u003c/div\u003e\u003c/div\u003e",
-  "iconSize": [24, 46],
-  "iconAnchor": [12, 34],
-  "className": "",
-});
-        
-    
-        var popup_0aeeccc99a2425639ca83085aea0d748 = L.popup({
-  "maxWidth": 300,
-});
-
-        
-            
-                var html_2b63a985cbc627c85841ed5d32749ed3 = $(`<div id="html_2b63a985cbc627c85841ed5d32749ed3" style="width: 100.0%; height: 100.0%;">Forecast #1<br>Time: 2026-08-15T00:00:00+08:00<br>Max winds: N/A km/h</div>`)[0];
-                popup_0aeeccc99a2425639ca83085aea0d748.setContent(html_2b63a985cbc627c85841ed5d32749ed3);
-            
-        
-
-        marker_7b15e5472003358ae372b64d5d566dff.bindPopup(popup_0aeeccc99a2425639ca83085aea0d748)
-        ;
-
-        
-    
-    
-            marker_7b15e5472003358ae372b64d5d566dff.bindTooltip(
-                `<div>
-                     Forecast position
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_7b15e5472003358ae372b64d5d566dff.setIcon(div_icon_fd4a23269d9e22a6b5c37e87654ade96);
-            
-    
-            var tile_layer_ab8e6bf0b62339556ed0cee32df474b5 = L.tileLayer(
+            var tile_layer_e3d757582e29e2e0fe2de455c6012c77 = L.tileLayer(
                 "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Aqua_Brightness_Temp_Band31_Day/default/2026-08-12/GoogleMapsCompatible_Level7///.png",
                 {
   "minZoom": 4,
@@ -384,26 +237,26 @@
             );
         
     
-            tile_layer_ab8e6bf0b62339556ed0cee32df474b5.addTo(map_5908e059edb7fcac4d75c1c67d734ce0);
+            tile_layer_e3d757582e29e2e0fe2de455c6012c77.addTo(map_cfc64152b74266976100f0729c955522);
         
     
-            var layer_control_8f851b2116c4559094dcc8c9ac21f5a3_layers = {
+            var layer_control_b84f9e40e50e7d6dae8a07e74389f0e7_layers = {
                 base_layers : {
-                    "cartodbpositron" : tile_layer_0d61dc3fbc673099ec34a86ecfcbe170,
-                    "IR Satellite (MODIS Aqua)" : tile_layer_ab8e6bf0b62339556ed0cee32df474b5,
+                    "cartodbpositron" : tile_layer_ac7ebbfcb561e52c0e51852bfe0c7826,
+                    "IR Satellite (MODIS Aqua)" : tile_layer_e3d757582e29e2e0fe2de455c6012c77,
                 },
                 overlays :  {
                 },
             };
-            let layer_control_8f851b2116c4559094dcc8c9ac21f5a3 = L.control.layers(
-                layer_control_8f851b2116c4559094dcc8c9ac21f5a3_layers.base_layers,
-                layer_control_8f851b2116c4559094dcc8c9ac21f5a3_layers.overlays,
+            let layer_control_b84f9e40e50e7d6dae8a07e74389f0e7 = L.control.layers(
+                layer_control_b84f9e40e50e7d6dae8a07e74389f0e7_layers.base_layers,
+                layer_control_b84f9e40e50e7d6dae8a07e74389f0e7_layers.overlays,
                 {
   "position": "topright",
   "collapsed": true,
   "autoZIndex": true,
 }
-            ).addTo(map_5908e059edb7fcac4d75c1c67d734ce0);
+            ).addTo(map_cfc64152b74266976100f0729c955522);
 
         
 </script>
