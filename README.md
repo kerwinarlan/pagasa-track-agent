@@ -1,16 +1,53 @@
-# PAGASA Track Agent
+<div align="center">
 
-Structured Storm Tracking Pipeline
+# 🌪️ PAGASA Track Agent
 
-## Overview
+**Structured storm tracking pipeline**
+
+[![Python](https://img.shields.io/badge/Python%203.9-3776AB?logo=python&logoColor=white)](https://www.python.org)
+[![DeepSeek](https://img.shields.io/badge/DeepSeek-4D6BFE?logo=deepseek&logoColor=white)](https://deepseek.com)
+[![Instructor](https://img.shields.io/badge/Instructor-1.15.4-0A0A0A?logo=openai&logoColor=white)](https://python.useinstructor.com)
+[![Pydantic](https://img.shields.io/badge/Pydantic%20v2-E92063?logo=pydantic&logoColor=white)](https://docs.pydantic.dev)
+[![Leaflet](https://img.shields.io/badge/Leaflet-199900?logo=leaflet&logoColor=white)](https://leafletjs.com)
+[![pytest](https://img.shields.io/badge/pytest-42%20tests-0A9EDC?logo=pytest&logoColor=white)](https://docs.pytest.org)
+
+</div>
 
 PAGASA Track Agent converts raw PAGASA Severe Weather Bulletin text into
-structured, validated, and visualizable storm tracking data.
+structured, validated, and visualizable storm tracking data: parse with
+DeepSeek + Instructor, validate with Pydantic v2, export as GeoJSON, and
+render as an interactive Leaflet map - with every coordinate checked against
+the Philippine Area of Responsibility (PAR) bounds: latitude 4N-25N,
+longitude 116E-127E.
 
-The pipeline parses bulletin text with DeepSeek and Instructor, validates the
-result with Pydantic v2, exports it as GeoJSON, and renders it as an
-interactive Leaflet map. All coordinates are validated against the Philippine
-Area of Responsibility (PAR) bounds: latitude 4N-25N, longitude 116E-127E.
+---
+
+## Table of Contents
+
+- [Why it exists: bulletins are prose, not data](#why-it-exists-bulletins-are-prose-not-data)
+- [Architecture](#architecture)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Validation Rules](#validation-rules)
+- [Repository Layout](#repository-layout)
+- [Local Setup](#local-setup)
+- [Validation](#validation)
+
+---
+
+## Why it exists: bulletins are prose, not data
+
+PAGASA Severe Weather Bulletins are the authoritative source for typhoon
+positions in the Philippines - but they arrive as free text, with coordinates,
+wind speeds, and signal numbers scattered through prose. Turning them into
+track data by hand is slow and error-prone; a single mistyped coordinate puts
+a storm outside its own track. This pipeline automates the whole chain:
+
+| Problem | Solution | Result |
+|---|---|---|
+| Bulletins are prose, not data | DeepSeek + Instructor extract a structured `StormBulletin`, re-prompting up to 3 times on validation failure | A machine-readable model every time |
+| LLMs can invent coordinates | Pydantic v2 enforces PAR bounds, enums, and PAGASA intensity thresholds | Track points that are always physically plausible |
+| Track tables are hard to read | Folium renders an interactive Leaflet map with a scrubbable timeline | Storm movement visible at a glance |
 
 ## Architecture
 
@@ -64,7 +101,50 @@ Pipeline stages:
 - **Tests** - 42 pytest tests cover schemas, extraction flow, GeoJSON
   export, and map rendering.
 
-## Quickstart
+## Tech Stack
+
+| Component      | Technology                                        |
+| -------------- | ------------------------------------------------- |
+| Language       | Python 3.9+                                       |
+| Validation     | Pydantic v2 (2.13.4)                              |
+| LLM extraction | Instructor (1.15.4) + OpenAI SDK (2.48.0)         |
+| LLM provider   | DeepSeek API (`deepseek-chat`)                    |
+| Maps           | Folium (0.20.0) / Leaflet                         |
+| Testing        | Pytest (8.4.2)                                    |
+
+## Validation Rules
+
+The `Coordinate` schema rejects any position outside the Philippine Area of
+Responsibility:
+
+- Latitude: 4.0 to 25.0 degrees north
+- Longitude: 116.0 to 127.0 degrees east
+
+The `StormBulletin` model validator enforces PAGASA intensity thresholds:
+
+| Category              | Max sustained winds (km/h) |
+| --------------------- | -------------------------- |
+| Tropical Depression   | under 63                   |
+| Tropical Storm        | 63-88                      |
+| Severe Tropical Storm | 89-117                     |
+| Typhoon               | 118-184                    |
+| Super Typhoon         | 185 and above              |
+
+## Repository Layout
+
+```
+src/
+  schemas/bulletin.py     Pydantic v2 models and PAR validators
+  extractor.py            DeepSeek + Instructor structured extraction
+  geojson_exporter.py     RFC 7946 GeoJSON export
+  map_visualizer.py       Folium / Leaflet map rendering
+data/
+  raw/sample_bulletin.txt Sample PAGASA bulletin
+  output/                 Generated GeoJSON and HTML map
+tests/                    Pytest test suite
+```
+
+## Local Setup
 
 ### Prerequisites
 
@@ -92,12 +172,6 @@ The repository ships with a sample bulletin at
 `data/raw/sample_bulletin.txt` and an existing `.venv` (created with
 `python3.9`). If you use `direnv`, the included `.envrc` activates the
 virtual environment automatically.
-
-### Run the tests
-
-```bash
-python -m pytest tests/
-```
 
 ### Run the extractor
 
@@ -131,45 +205,8 @@ map. This step does not call the API.
 Run modules with `python -m` (not `python src/extractor.py`) because the
 modules import from the `src` package.
 
-## Project Structure
+## Validation
 
+```bash
+python -m pytest tests/    # 42 tests: schemas, extraction flow, GeoJSON export, map rendering
 ```
-src/
-  schemas/bulletin.py     Pydantic v2 models and PAR validators
-  extractor.py            DeepSeek + Instructor structured extraction
-  geojson_exporter.py     RFC 7946 GeoJSON export
-  map_visualizer.py       Folium / Leaflet map rendering
-data/
-  raw/sample_bulletin.txt Sample PAGASA bulletin
-  output/                 Generated GeoJSON and HTML map
-tests/                    Pytest test suite
-```
-
-## Tech Stack
-
-| Component      | Technology                                        |
-| -------------- | ------------------------------------------------- |
-| Language       | Python 3.9+                                       |
-| Validation     | Pydantic v2 (2.13.4)                              |
-| LLM extraction | Instructor (1.15.4) + OpenAI SDK (2.48.0)         |
-| LLM provider   | DeepSeek API (`deepseek-chat`)                    |
-| Maps           | Folium (0.20.0) / Leaflet                         |
-| Testing        | Pytest (8.4.2)                                    |
-
-## Validation Rules
-
-The `Coordinate` schema rejects any position outside the Philippine Area of
-Responsibility:
-
-- Latitude: 4.0 to 25.0 degrees north
-- Longitude: 116.0 to 127.0 degrees east
-
-The `StormBulletin` model validator enforces PAGASA intensity thresholds:
-
-| Category              | Max sustained winds (km/h) |
-| --------------------- | -------------------------- |
-| Tropical Depression   | under 63                   |
-| Tropical Storm        | 63-88                      |
-| Severe Tropical Storm | 89-117                     |
-| Typhoon               | 118-184                    |
-| Super Typhoon         | 185 and above              |
