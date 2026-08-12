@@ -6,7 +6,7 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          124.8,
+          125.0,
           13.5
         ]
       },
@@ -14,79 +14,9 @@
         "storm_name": "Maymay",
         "max_wind_kph": 55.0,
         "pressure": 1000.0,
-        "issued_at": "2026-08-12T10:08:38+08:00",
+        "issued_at": "2026-08-12T12:49:26+08:00",
         "signal_number": 1,
         "typhoon_category": "Tropical Depression"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          123.9,
-          14.7
-        ]
-      },
-      "properties": {
-        "index": 0,
-        "timestamp": "2026-08-12T22:00:00+08:00"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          122.7,
-          16.2
-        ]
-      },
-      "properties": {
-        "index": 1,
-        "timestamp": "2026-08-13T10:00:00+08:00"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          120.1,
-          18.9
-        ]
-      },
-      "properties": {
-        "index": 2,
-        "timestamp": "2026-08-14T10:00:00+08:00"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            124.8,
-            13.5
-          ],
-          [
-            123.9,
-            14.7
-          ],
-          [
-            122.7,
-            16.2
-          ],
-          [
-            120.1,
-            18.9
-          ]
-        ]
-      },
-      "properties": {
-        "storm_name": "Maymay",
-        "feature": "storm_track"
       }
     }
   ]
