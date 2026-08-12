@@ -14,7 +14,7 @@
         "storm_name": "Maymay",
         "max_wind_kph": 55.0,
         "pressure": 1000.0,
-        "issued_at": "2026-08-13T03:14:12+08:00",
+        "issued_at": "2026-08-13T00:00:00+08:00",
         "signal_number": 1,
         "typhoon_category": "Tropical Depression"
       }
@@ -24,13 +24,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          125.0,
-          15.0
+          122.5,
+          16.5
         ]
       },
       "properties": {
         "index": 0,
-        "timestamp": "2026-08-13T03:14:12+08:00"
+        "timestamp": "2026-08-14T00:00:00+08:00"
       }
     },
     {
@@ -38,55 +38,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          123.5,
-          16.0
-        ]
-      },
-      "properties": {
-        "index": 1,
-        "timestamp": "2026-08-13T15:14:12+08:00"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          121.5,
-          17.0
-        ]
-      },
-      "properties": {
-        "index": 2,
-        "timestamp": "2026-08-14T03:14:12+08:00"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          119.5,
+          120.0,
           18.0
         ]
       },
       "properties": {
-        "index": 3,
-        "timestamp": "2026-08-14T15:14:12+08:00"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          117.0,
-          19.0
-        ]
-      },
-      "properties": {
-        "index": 4,
-        "timestamp": "2026-08-15T03:14:12+08:00"
+        "index": 1,
+        "timestamp": "2026-08-15T00:00:00+08:00"
       }
     },
     {
@@ -99,24 +57,12 @@
             15.0
           ],
           [
-            125.0,
-            15.0
+            122.5,
+            16.5
           ],
           [
-            123.5,
-            16.0
-          ],
-          [
-            121.5,
-            17.0
-          ],
-          [
-            119.5,
+            120.0,
             18.0
-          ],
-          [
-            117.0,
-            19.0
           ]
         ]
       },
