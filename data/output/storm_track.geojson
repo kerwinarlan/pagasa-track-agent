@@ -6,15 +6,15 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          126.8,
-          20.4
+          125.0,
+          15.0
         ]
       },
       "properties": {
         "storm_name": "Maymay",
-        "max_wind_kph": 45.0,
+        "max_wind_kph": 55.0,
         "pressure": 1000.0,
-        "issued_at": "2026-08-13T01:58:45+08:00",
+        "issued_at": "2026-08-13T03:14:12+08:00",
         "signal_number": 1,
         "typhoon_category": "Tropical Depression"
       }
@@ -24,13 +24,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          125.6,
-          21.2
+          125.0,
+          15.0
         ]
       },
       "properties": {
         "index": 0,
-        "timestamp": "2026-08-13T20:00:00+08:00"
+        "timestamp": "2026-08-13T03:14:12+08:00"
       }
     },
     {
@@ -38,13 +38,13 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          124.3,
-          22.1
+          123.5,
+          16.0
         ]
       },
       "properties": {
         "index": 1,
-        "timestamp": "2026-08-14T08:00:00+08:00"
+        "timestamp": "2026-08-13T15:14:12+08:00"
       }
     },
     {
@@ -52,13 +52,41 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          122.9,
-          23.0
+          121.5,
+          17.0
         ]
       },
       "properties": {
         "index": 2,
-        "timestamp": "2026-08-14T20:00:00+08:00"
+        "timestamp": "2026-08-14T03:14:12+08:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          119.5,
+          18.0
+        ]
+      },
+      "properties": {
+        "index": 3,
+        "timestamp": "2026-08-14T15:14:12+08:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          117.0,
+          19.0
+        ]
+      },
+      "properties": {
+        "index": 4,
+        "timestamp": "2026-08-15T03:14:12+08:00"
       }
     },
     {
@@ -67,20 +95,28 @@
         "type": "LineString",
         "coordinates": [
           [
-            126.8,
-            20.4
+            125.0,
+            15.0
           ],
           [
-            125.6,
-            21.2
+            125.0,
+            15.0
           ],
           [
-            124.3,
-            22.1
+            123.5,
+            16.0
           ],
           [
-            122.9,
-            23.0
+            121.5,
+            17.0
+          ],
+          [
+            119.5,
+            18.0
+          ],
+          [
+            117.0,
+            19.0
           ]
         ]
       },
