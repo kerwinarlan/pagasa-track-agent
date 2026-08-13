@@ -1,16 +1,12 @@
 name: PAGASA Auto-Tracker
 
-# 1. THE ALARM CLOCK: Run every hour, and allow manual triggering
+# Run manually only (workflow_dispatch). No cron: hourly runs burned
+# DeepSeek API tokens for a map nobody was viewing.
 on:
-  schedule:
-    - cron: "0 * * * *"
   workflow_dispatch:
 
-# 2. THE PERMISSIONS: Allow the bot to push code and publish the webpage
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 # Only one update may run at a time. If a new run starts while another
 # is still going, it waits instead of pushing a stale snapshot.
