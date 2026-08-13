@@ -6,15 +6,15 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          125.5,
-          13.5
+          125.0,
+          15.0
         ]
       },
       "properties": {
         "storm_name": "Maymay",
-        "max_wind_kph": 1.0,
+        "max_wind_kph": 55.0,
         "pressure": 1000.0,
-        "issued_at": "2026-08-13T10:10:12+08:00",
+        "issued_at": "2026-08-13T00:00:00+08:00",
         "signal_number": 1,
         "typhoon_category": "Tropical Depression"
       }
