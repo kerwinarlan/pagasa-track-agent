@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write   # required by actions/deploy-pages
+  pages: write      # required by actions/deploy-pages
 
 # Only one update may run at a time. If a new run starts while another
 # is still going, it waits instead of pushing a stale snapshot.
@@ -54,3 +56,18 @@ jobs:
           # then push. This prevents the 'fetch first' rejection.
           git pull --rebase origin main
           git push
+
+      # Step F: Publish the map to GitHub Pages (site root is the map)
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Stage Map as Site Root
+        run: |
+          mkdir -p _site
+          cp data/output/storm_map.html _site/index.html
+          cp data/output/storm_track.geojson _site/storm_track.geojson
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy to Pages
+        uses: actions/deploy-pages@v4
