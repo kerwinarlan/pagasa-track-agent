@@ -1,7 +1,7 @@
 """Tests for the GeoJSON exporter."""
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pytest
 
@@ -24,11 +24,11 @@ def make_bulletin(with_forecast_track: bool = True) -> StormBulletin:
     track = (
         [
             ForecastPoint(
-                timestamp=datetime(2024, 11, 18, 5, 0),
+                timestamp=datetime(2024, 11, 18, 5, 0, tzinfo=timezone.utc),
                 position=Coordinate(lat=15.8, lon=123.6),
             ),
             ForecastPoint(
-                timestamp=datetime(2024, 11, 19, 5, 0),
+                timestamp=datetime(2024, 11, 19, 5, 0, tzinfo=timezone.utc),
                 position=Coordinate(lat=16.4, lon=122.2),
             ),
         ]
@@ -37,7 +37,7 @@ def make_bulletin(with_forecast_track: bool = True) -> StormBulletin:
     )
     return StormBulletin(
         bulletin_number=15,
-        issued_at=datetime(2024, 11, 17, 5, 0),
+        issued_at=datetime(2024, 11, 17, 5, 0, tzinfo=timezone.utc),
         storm_name="SAMPLE",
         signal_number=WindSignalNumber.SIGNAL_4,
         typhoon_category=TyphoonCategory.SUPER_TYPHOON,
@@ -75,7 +75,7 @@ class TestBulletinToFeatureCollection:
         assert len(forecast_features) == 2
         assert forecast_features[0]["geometry"]["coordinates"] == [123.6, 15.8]
         assert forecast_features[1]["geometry"]["coordinates"] == [122.2, 16.4]
-        assert forecast_features[0]["properties"]["timestamp"] == "2024-11-18T05:00:00"
+        assert forecast_features[0]["properties"]["timestamp"] == "2024-11-18T05:00:00+00:00"
 
     def test_track_linestring_connects_all_points(self):
         collection = bulletin_to_feature_collection(make_bulletin())

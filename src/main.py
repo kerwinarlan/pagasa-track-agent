@@ -1,8 +1,9 @@
 """Automated entry point for the PAGASA storm track agent.
 
 The script scrapes the latest Severe Weather Bulletin from the PAGASA
-website, extracts structured data with DeepSeek, exports the forecast
-track to GeoJSON, and renders an interactive storm map.
+website, resolves it to structured data (deterministic parser first,
+LLM fallback), exports the forecast track to GeoJSON, and renders an
+interactive storm map.
 """
 
 from __future__ import annotations

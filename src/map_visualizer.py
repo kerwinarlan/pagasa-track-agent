@@ -383,10 +383,11 @@ def _add_center_marker(map_obj: folium.Map, feature: dict[str, Any]) -> None:
     props = feature["properties"]
     max_wind_kph = props.get("max_wind_kph")
     wind_speed_kph = int(max_wind_kph) if max_wind_kph is not None else None
+    signal = props.get("signal_number")
     popup_html = (
         f"<b>{props['storm_name']}</b><br>"
         f"Category: {props.get('typhoon_category', 'N/A')}<br>"
-        f"Signal: #{props.get('signal_number', 'N/A')}<br>"
+        f"Signal: {('#' + str(signal)) if signal is not None else 'none'}<br>"
         f"Max winds: "
         f"{_format_number(max_wind_kph) if max_wind_kph is not None else 'N/A'}"
         f" km/h<br>"

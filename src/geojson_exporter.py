@@ -13,7 +13,6 @@ from typing import Any
 from src.schemas.bulletin import Coordinate, StormBulletin
 
 _PROJECT_ROOT: Path = Path(__file__).resolve().parent.parent
-SAMPLE_BULLETIN_PATH: Path = _PROJECT_ROOT / "data" / "raw" / "sample_bulletin.txt"
 DEFAULT_OUTPUT_PATH: Path = _PROJECT_ROOT / "data" / "output" / "storm_track.geojson"
 
 
@@ -32,11 +31,19 @@ def _current_center_feature(bulletin: StormBulletin) -> dict[str, Any]:
         "geometry": _point(bulletin.current_position),
         "properties": {
             "storm_name": bulletin.storm_name,
+            "international_name": bulletin.international_name,
             "max_wind_kph": bulletin.max_sustained_winds_kmh,
+            "gustiness_kph": bulletin.gustiness_kmh,
             "pressure": bulletin.central_pressure_hpa,
             "issued_at": bulletin.issued_at.isoformat(),
-            "signal_number": bulletin.signal_number.value,
+            "signal_number": (
+                bulletin.signal_number.value if bulletin.signal_number else None
+            ),
             "typhoon_category": bulletin.typhoon_category.value,
+            "inside_par": bulletin.inside_par,
+            "movement_speed_kph": bulletin.movement_speed_kmh,
+            "movement_direction_deg": bulletin.movement_direction_deg,
+            "is_final": bulletin.is_final,
         },
     }
 
@@ -52,6 +59,10 @@ def _forecast_features(bulletin: StormBulletin) -> list[dict[str, Any]]:
                 "properties": {
                     "index": index,
                     "timestamp": forecast_point.timestamp.isoformat(),
+                    "max_wind_kph": forecast_point.max_sustained_winds_kmh,
+                    "category": (
+                        forecast_point.category.value if forecast_point.category else None
+                    ),
                 },
             }
         )
@@ -109,10 +120,14 @@ def export_to_geojson(bulletin: StormBulletin, output_path: str) -> dict[str, An
 
 
 def main() -> None:
-    """Parse the sample bulletin and export it to GeoJSON."""
+    """Parse the first corpus bulletin and export it to GeoJSON."""
     from src.extractor import parse_bulletin_text
 
-    raw_text = SAMPLE_BULLETIN_PATH.read_text(encoding="utf-8")
+    corpus_dir = _PROJECT_ROOT / "data" / "raw" / "corpus"
+    paths = sorted(corpus_dir.glob("*.txt"))
+    if not paths:
+        raise SystemExit("No corpus bulletins found; run scripts/fetch_corpus.py first.")
+    raw_text = paths[0].read_text(encoding="utf-8")
     bulletin = parse_bulletin_text(raw_text)
     export_to_geojson(bulletin, str(DEFAULT_OUTPUT_PATH))
     print(f"Saved storm track to {DEFAULT_OUTPUT_PATH}")
