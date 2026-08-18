@@ -1,14 +1,14 @@
 name: PAGASA Auto-Tracker
 
 # Run manually only (workflow_dispatch). No cron: hourly runs burned
-# DeepSeek API tokens for a map nobody was viewing.
+# DeepSeek API tokens for a map nobody was viewing. Since the pipeline
+# now stops before the LLM on no-active-cyclone days, a cron could be
+# re-added safely if live auto-tracking is wanted.
 on:
   workflow_dispatch:
 
 permissions:
   contents: write
-  id-token: write   # required by actions/deploy-pages
-  pages: write      # required by actions/deploy-pages
 
 # Only one update may run at a time. If a new run starts while another
 # is still going, it waits instead of pushing a stale snapshot.
@@ -44,7 +44,10 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: python -m src.main
 
-      # Step E: Commit the new HTML map back to the repository
+      # Step E: Commit the new HTML map back to the repository. GitHub Pages
+      # is in branch mode (deploys from main), so the push alone republishes
+      # the map at /data/output/storm_map.html - no separate deploy step.
+      # -f is required: data/output/ is gitignored.
       - name: Commit and Push Changes
         run: |
           git config --global user.name "GitHub Actions Bot"
@@ -56,18 +59,3 @@ jobs:
           # then push. This prevents the 'fetch first' rejection.
           git pull --rebase origin main
           git push
-
-      # Step F: Publish the map to GitHub Pages (site root is the map)
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-      - name: Stage Map as Site Root
-        run: |
-          mkdir -p _site
-          cp data/output/storm_map.html _site/index.html
-          cp data/output/storm_track.geojson _site/storm_track.geojson
-      - name: Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-      - name: Deploy to Pages
-        uses: actions/deploy-pages@v4
