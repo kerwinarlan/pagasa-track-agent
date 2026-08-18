@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 
-from src.scraper import fetch_bulletin_text
+from src.scraper import NoActiveCycloneError, fetch_bulletin_text
 
 MOCK_URL: str = "https://example.com/bulletin.html"
 
@@ -47,6 +47,49 @@ class TestFetchBulletinText:
         assert "Severe Weather Bulletin #1" in text
         assert 'Typhoon "Test" has strengthened.' in text
         assert "<h1>" not in text
+
+    @patch("src.scraper.requests.get")
+    def test_bulletin_extracted_from_article_content_only(self, mock_get):
+        html = """
+        <html><body>
+          <nav>Home Weather Contact</nav>
+          <div class="article-content">
+            <p>SEVERE WEATHER BULLETIN #7</p>
+            <p>FOR: TYPHOON \"PEPITO\"</p>
+          </div>
+          <footer>Privacy Notice</footer>
+        </body></html>
+        """
+        mock_get.return_value = make_response(200, html)
+
+        text = fetch_bulletin_text(MOCK_URL)
+
+        assert "SEVERE WEATHER BULLETIN #7" in text
+        assert "PEPITO" in text
+        assert "Home Weather Contact" not in text
+        assert "Privacy Notice" not in text
+
+    @patch("src.scraper.requests.get")
+    def test_no_active_cyclone_raises(self, mock_get):
+        html = """
+        <html><body>
+          <div class="article-content">
+            <h3>No Active Tropical Cyclone within the Philippine Area of Responsibility</h3>
+          </div>
+        </body></html>
+        """
+        mock_get.return_value = make_response(200, html)
+
+        with pytest.raises(NoActiveCycloneError, match="no active tropical cyclone"):
+            fetch_bulletin_text(MOCK_URL)
+
+    @patch("src.scraper.requests.get")
+    def test_falls_back_to_full_page_without_article_content(self, mock_get):
+        mock_get.return_value = make_response(200, MOCK_HTML)
+
+        text = fetch_bulletin_text(MOCK_URL)
+
+        assert "Severe Weather Bulletin #1" in text
 
     @patch("src.scraper.requests.get")
     def test_404_response_raises_runtime_error(self, mock_get):

@@ -86,6 +86,10 @@ Pipeline stages:
 
 ## Features
 
+- **Live scraper** - extracts the bulletin region only (site navigation is
+  dropped) and stops cleanly on no-active-cyclone days instead of burning
+  LLM tokens on page chrome. The resolver refuses the LLM fallback below
+  confidence 0.4, so non-bulletin text never reaches the API.
 - **Deterministic first** - 36 of 37 corpus bulletins parse without the
   LLM: same input, same output, zero API cost. Forecast valid times are
   resolved from labels (weekday names override misprinted hour counts;

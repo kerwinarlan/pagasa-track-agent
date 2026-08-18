@@ -82,6 +82,16 @@ def parse_bulletin_with_source(
             f"{result.confidence:.2f}): {result.warnings[:3]}"
         )
 
+    if result.confidence < 0.4:
+        # The designed LLM fallback is for bulletins with an unusual format
+        # (the corpus LPA-dissipation final parses at 0.6). Below 0.4 the
+        # input is not a bulletin (navigation junk, empty page); calling the
+        # LLM would burn tokens and hallucinate a storm.
+        raise RuntimeError(
+            "Input does not look like a PAGASA bulletin (confidence "
+            f"{result.confidence:.2f}); refusing LLM fallback."
+        )
+
     text_hash = _text_hash(raw_text)
     if text_hash in _cache:
         from pydantic import TypeAdapter
